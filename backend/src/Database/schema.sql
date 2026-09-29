@@ -1,6 +1,7 @@
 CREATE DATABASE IF NOT EXISTS microinfluencer_db;
-SHOW DATABASES;
-CREATE TABLE users (
+USE microinfluencer_db;
+
+CREATE TABLE IF NOT EXISTS users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
