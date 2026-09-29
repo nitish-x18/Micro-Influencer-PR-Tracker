@@ -1,4 +1,4 @@
-const db = require("../db/databaseConfig");
+import db from "../db/databaseConfig.js";
 
 // Create a new user
 const createUser = (full_name, email, password_hash, callback) => {
@@ -10,7 +10,8 @@ const createUser = (full_name, email, password_hash, callback) => {
     db.query(sql, [full_name, email, password_hash], callback);
 };
 
-// Find a user by email
+
+// Find user by email
 const getUserByEmail = (email, callback) => {
     const sql = `
         SELECT *
@@ -21,7 +22,8 @@ const getUserByEmail = (email, callback) => {
     db.query(sql, [email], callback);
 };
 
-// Find a user by ID
+
+// Find user by ID
 const getUserById = (user_id, callback) => {
     const sql = `
         SELECT *
@@ -32,7 +34,9 @@ const getUserById = (user_id, callback) => {
     db.query(sql, [user_id], callback);
 };
 
-module.exports = {
+
+// Export functions
+export {
     createUser,
     getUserByEmail,
     getUserById
