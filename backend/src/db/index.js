@@ -1,8 +1,25 @@
-// in that connect databse to our server
+import mysql from "mysql2";
+import dotenv from "dotenv";
 
-//write here configuration
-import { connectDB } from "./databaseConfig.js";
+dotenv.config();
 
-connectDB()
+const db = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+});
 
-console.log("DB CONNECTED SUCCESFULLY")
+db.getConnection((err, connection) => {
+    if (err) {
+        console.error("DB CONNECTION FAILED:", err.message);
+        return;
+    }
+
+    console.log("DB CONNECTED SUCCESSFULLY");
+    connection.release();
+});
+
+export default db;
