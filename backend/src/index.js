@@ -1,8 +1,10 @@
 import { app } from "./app.js";
 import dotenv from "dotenv";
-import db from "./db/index.js";
+import { connectDB } from "./db/index.js";
 
 dotenv.config();
+
+await connectDB()
 
 app.on("error", (error) => {
     console.log("ERROR: APP ERROR!!!", error);
