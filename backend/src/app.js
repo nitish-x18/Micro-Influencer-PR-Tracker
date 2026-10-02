@@ -21,6 +21,7 @@ import brandRouter from "./routers/brand.route.js"
 import productRouter from "./routers/product.route.js"
 import shipmentRouter from "./routers/shipment.route.js"
 import contentDeadlineRouter from "./routers/contentDeadline.route.js"
+import healthRouter from "./routers/healthcheack.route.js"
 
 //ROUTER DECLARATION
 app.use((req, res, next) => {
@@ -33,6 +34,7 @@ app.use("/api/v1/brands", brandRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/shipments", shipmentRouter);
 app.use("/api/v1/content-deadlines", contentDeadlineRouter)
+app.use("/api/v1/health", healthRouter)
 
 console.log("ROUTER LOADED");
 
