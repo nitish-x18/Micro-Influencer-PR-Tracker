@@ -1,7 +1,7 @@
 import { getDB } from "../db/databaseConfig.js";
 
 // Get all users
-export async function getAllUsers() {
+async function getAllUsers() {
     const db = getDB();
 
     const [users] = await db.query(
@@ -12,7 +12,7 @@ export async function getAllUsers() {
 }
 
 // Get user by ID
-export async function getUserById(userId) {
+async function getUserById(userId) {
     const db = getDB();
 
     const [users] = await db.query(
@@ -24,7 +24,7 @@ export async function getUserById(userId) {
 }
 
 // Get user by email
-export async function getUserByEmail(email) {
+async function getUserByEmail(email) {
     const db = getDB();
 
     const [users] = await db.query(
@@ -36,7 +36,7 @@ export async function getUserByEmail(email) {
 }
 
 // Create a new user
-export async function createUser(fullName, email, passwordHash) {
+async function createUser(fullName, email, passwordHash) {
     const db = getDB();
 
     const [result] = await db.query(
@@ -48,3 +48,10 @@ export async function createUser(fullName, email, passwordHash) {
 
     return result;
 }
+
+export {
+    getAllUsers,
+    getUserById,
+    getUserByEmail,
+    createUser
+};
