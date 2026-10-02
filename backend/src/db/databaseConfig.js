@@ -3,16 +3,17 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+let db;
+
 export async function connectDB() {
     try {
-        const connection = await mysql.createConnection({
+        db = await mysql.createConnection({
             host: process.env.DB_HOST,
             port: Number(process.env.DB_PORT),
             user: process.env.DB_USER,
             password: process.env.DB_PASSWORD,
             database: process.env.DB_NAME,
 
-            // Required for TiDB Cloud public connection
             ssl: {
                 minVersion: "TLSv1.2"
             }
@@ -20,15 +21,24 @@ export async function connectDB() {
 
         console.log("DB CONNECTED SUCCESSFULLY");
 
-        // Test the actual database
-        const [rows] = await connection.query("SELECT DATABASE() AS database_name");
+        const [rows] = await db.query(
+            "SELECT DATABASE() AS database_name"
+        );
 
         console.log("Connected database:", rows[0].database_name);
 
-        return connection;
+        return db;
 
     } catch (error) {
         console.error("DATABASE CONNECTION FAILED:", error.message);
         throw error;
     }
+}
+
+export function getDB() {
+    if (!db) {
+        throw new Error("Database is not connected yet.");
+    }
+
+    return db;
 }
