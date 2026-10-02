@@ -10,36 +10,30 @@ import {
 } from "../controllers/brand.controller.js";
 
 import { authenticateUser } from "../middlewares/auth.middleware.js";
+import { verifyBrandOwnership } from "../middlewares/brand.middleware.js";
 
 const router = Router();
 
-
-// All brand routes require authentication
 router.use(authenticateUser);
 
-
-// Get all brands
 router.get("/", getBrands);
 
-
-// Get logged-in user's brands
 router.get("/my", getMyBrands);
 
+router.get("/:brandId", verifyBrandOwnership, getBrand);
 
-// Get a specific brand
-router.get("/:brandId", getBrand);
-
-
-// Create a brand for logged-in user
 router.post("/", createNewBrand);
 
+router.put(
+    "/:brandId",
+    verifyBrandOwnership,
+    updateExistingBrand
+);
 
-// Update brand
-router.put("/:brandId", updateExistingBrand);
-
-
-// Delete brand
-router.delete("/:brandId", removeBrand);
-
+router.delete(
+    "/:brandId",
+    verifyBrandOwnership,
+    removeBrand
+);
 
 export default router;
