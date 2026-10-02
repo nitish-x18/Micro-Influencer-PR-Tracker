@@ -19,6 +19,7 @@ app.use(cookieParser());
 import userRouter from "./routers/user.route.js"
 import brandRouter from "./routers/brand.route.js"
 import productRouter from "./routers/product.route.js"
+import shipmentRouter from "./routers/shipment.route.js"
 
 //ROUTER DECLARATION
 app.use((req, res, next) => {
@@ -29,6 +30,7 @@ app.use((req, res, next) => {
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/brands", brandRouter);
 app.use("/api/v1/products", productRouter);
+app.use("./api/v1/shipments", shipmentRouter)
 
 console.log("ROUTER LOADED");
 
