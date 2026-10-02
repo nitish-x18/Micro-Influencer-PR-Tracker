@@ -17,6 +17,7 @@ app.use(cookieParser());
 
 //ROUTER IMPORT
 import userRouter from "./routers/user.route.js"
+import brandRouter from "./routers/brand.route.js"
 
 //ROUTER DECLARATION
 app.use((req, res, next) => {
@@ -25,7 +26,8 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/v1/users", userRouter)
+app.use("/api/v1/brands", brandRouter);
 
-console.log("USER ROUTER LOADED");
+console.log("ROUTER LOADED");
 
 export { app }
