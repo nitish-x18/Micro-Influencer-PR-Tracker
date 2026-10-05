@@ -17,18 +17,23 @@ export const authenticateUser = asyncHandler(async (req, res, next) => {
         throw new apiError(401, "Invalid authentication token");
     }
 
-    const decoded = jwt.verify(
-        token,
-        process.env.ACCESS_TOKEN_SECRET
-    );
+    let decoded;
 
-    const user = await getUserById(decoded.userId);
+    try {
+        decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
+    } catch (error) {
+        throw new apiError(401, "Invalid or expired authentication token");
+    }
+
+    const user = await getUserById(decoded.user_id);
 
     if (!user) {
         throw new apiError(401, "User no longer exists");
     }
 
-    // Store authenticated user in request
     req.user = user;
 
     next();
