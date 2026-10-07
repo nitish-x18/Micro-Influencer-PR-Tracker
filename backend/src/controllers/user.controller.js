@@ -147,14 +147,14 @@ export const logoutUser = asyncHandler(async (req, res) => {
     });
 
     return res
-    .status(200)
-    .json(
-        new apiResponse(
-            200,
-            null,
-            "Logout successful"
-        )
-    );
+        .status(200)
+        .json(
+            new apiResponse(
+                200,
+                null,
+                "Logout successful"
+            )
+        );
 });
 
 
