@@ -146,7 +146,9 @@ export const logoutUser = asyncHandler(async (req, res) => {
         sameSite: "lax"
     });
 
-    return res.status(200).json(
+    return res
+    .status(200)
+    .json(
         new apiResponse(
             200,
             null,
