@@ -1,3 +1,4 @@
+
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -33,32 +34,6 @@ app.use("/api/v1/brands", brandRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/shipments", shipmentRouter);
 app.use("/api/v1/content-deadlines", contentDeadlineRouter);
-
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({
-        statusCode: 404,
-        success: false,
-        message: "Route not found",
-        data: null
-    });
-});
-
-// Global error handler
-app.use((err, req, res, next) => {
-    console.error("ERROR:", err);
-
-    const statusCode = err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(statusCode).json({
-        statusCode,
-        success: false,
-        message,
-        data: err.data || null,
-        errors: err.errors || []
-    });
-});
 
 console.log("ROUTER LOADED");
 
