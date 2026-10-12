@@ -1,3 +1,4 @@
+
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -12,9 +13,15 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
 
-
 // Generate JWT
 const generateToken = (user) => {
+    if (!process.env.JWT_SECRET) {
+        throw new apiError(
+            500,
+            "Authentication configuration is missing"
+        );
+    }
+
     return jwt.sign(
         {
             user_id: user.user_id,
@@ -27,21 +34,27 @@ const generateToken = (user) => {
     );
 };
 
-
 // Register User
 export const registerUser = asyncHandler(async (req, res) => {
-
     const { full_name, email, password } = req.body;
 
-    if (!full_name || !email || !password) {
+    if (
+        typeof full_name !== "string" ||
+        !full_name.trim() ||
+        typeof email !== "string" ||
+        !email.trim() ||
+        typeof password !== "string" ||
+        !password
+    ) {
         throw new apiError(
             400,
             "Full name, email and password are required"
         );
     }
 
-    // Check if user already exists
-    const existingUser = await getUserByEmail(email);
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const existingUser = await getUserByEmail(normalizedEmail);
 
     if (existingUser) {
         throw new apiError(
@@ -50,20 +63,38 @@ export const registerUser = asyncHandler(async (req, res) => {
         );
     }
 
-    // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create user
-    const result = await createUser(
-        full_name,
-        email,
-        passwordHash
-    );
+    let result;
 
-    // Get newly created user
+    try {
+        result = await createUser(
+            full_name.trim(),
+            normalizedEmail,
+            passwordHash
+        );
+    } catch (error) {
+        // MySQL unique constraint protects against duplicate
+        // registrations arriving at the same time.
+        if (error.code === "ER_DUP_ENTRY") {
+            throw new apiError(
+                409,
+                "User with this email already exists"
+            );
+        }
+
+        throw error;
+    }
+
     const user = await getUserById(result.insertId);
 
-    // Remove password hash from response
+    if (!user) {
+        throw new apiError(
+            500,
+            "User was created but could not be retrieved"
+        );
+    }
+
     delete user.password_hash;
 
     return res.status(201).json(
@@ -75,21 +106,24 @@ export const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
-
 // Login User
 export const loginUser = asyncHandler(async (req, res) => {
-
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    if (
+        typeof email !== "string" ||
+        !email.trim() ||
+        typeof password !== "string" ||
+        !password
+    ) {
         throw new apiError(
             400,
             "Email and password are required"
         );
     }
 
-    // Find user
-    const user = await getUserByEmail(email);
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await getUserByEmail(normalizedEmail);
 
     if (!user) {
         throw new apiError(
@@ -98,7 +132,6 @@ export const loginUser = asyncHandler(async (req, res) => {
         );
     }
 
-    // Compare password
     const isPasswordCorrect = await bcrypt.compare(
         password,
         user.password_hash
@@ -111,12 +144,10 @@ export const loginUser = asyncHandler(async (req, res) => {
         );
     }
 
-    // Generate JWT
     const token = generateToken(user);
 
     delete user.password_hash;
 
-    // Store token in cookie
     res.cookie("accessToken", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -136,10 +167,8 @@ export const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-
 // Logout User
 export const logoutUser = asyncHandler(async (req, res) => {
-
     res.clearCookie("accessToken", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -155,19 +184,13 @@ export const logoutUser = asyncHandler(async (req, res) => {
     );
 });
 
-
 // Get Current User
 export const getCurrentUser = asyncHandler(async (req, res) => {
-
     const userId = req.user.user_id;
-
     const user = await getUserById(userId);
 
     if (!user) {
-        throw new apiError(
-            404,
-            "User not found"
-        );
+        throw new apiError(404, "User not found");
     }
 
     delete user.password_hash;
@@ -181,17 +204,11 @@ export const getCurrentUser = asyncHandler(async (req, res) => {
     );
 });
 
-
 // Get All Users
 export const getUsers = asyncHandler(async (req, res) => {
-
     const users = await getAllUsers();
 
-    // Remove password hashes
-    const safeUsers = users.map(user => {
-        delete user.password_hash;
-        return user;
-    });
+    const safeUsers = users.map(({ password_hash, ...user }) => user);
 
     return res.status(200).json(
         new apiResponse(
