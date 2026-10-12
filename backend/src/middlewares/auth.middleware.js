@@ -22,7 +22,7 @@ export const authenticateUser = asyncHandler(async (req, res, next) => {
         process.env.ACCESS_TOKEN_SECRET
     );
 
-    const user = await getUserById(decoded.userId);
+    const user = await getUserById(decoded.user_id);
 
     if (!user) {
         throw new apiError(401, "User no longer exists");
