@@ -20,9 +20,9 @@ const generateToken = (user) => {
             user_id: user.user_id,
             email: user.email
         },
-        process.env.JWT_SECRET,
+        process.env.ACCESS_TOKEN_SECRET,
         {
-            expiresIn: process.env.JWT_EXPIRES_IN || "1d"
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || "1d"
         }
     );
 };
