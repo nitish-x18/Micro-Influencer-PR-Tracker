@@ -1,4 +1,4 @@
-import { getDB } from "../db/databaseConfig.js";
+import { getDB } from "../config/databaseConfig.js";
 
 // Get all products
 export async function getAllProducts() {
