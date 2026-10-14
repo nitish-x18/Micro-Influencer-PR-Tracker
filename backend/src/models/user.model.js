@@ -1,4 +1,4 @@
-import { getDB } from "../config/databaseConfig.js";
+import { db } from "../config/databaseConfig.js";
 
 // Get all users
 async function getAllUsers() {

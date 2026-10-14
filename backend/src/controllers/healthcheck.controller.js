@@ -1,11 +1,9 @@
-import { getDB } from "../db/databaseConfig.js";
+import { db } from "../config/databaseConfig.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { apiError } from "../utils/apiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const healthCheck = asyncHandler(async (req, res) => {
-    const db = getDB();
-
     try {
         await db.query("SELECT 1");
 
@@ -19,7 +17,6 @@ export const healthCheck = asyncHandler(async (req, res) => {
                 "Backend is healthy"
             )
         );
-
     } catch (error) {
         throw new apiError(503, "Database is unavailable");
     }
