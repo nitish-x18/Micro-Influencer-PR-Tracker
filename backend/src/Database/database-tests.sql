@@ -1,20 +1,20 @@
 -- =========================================================
 -- MICRO-INFLUENCER PR PACKAGE TRACKER
--- DATABASE TESTING
+-- DATABASE VALIDATION TESTS
 -- =========================================================
 
 USE microinfluencer_db;
 
 
 -- =========================================================
--- 1. CHECK TABLES
+-- 1. CHECK ALL TABLES
 -- =========================================================
 
 SHOW TABLES;
 
 
 -- =========================================================
--- 2. CHECK TABLE STRUCTURE
+-- 2. CHECK ALL TABLE STRUCTURES
 -- =========================================================
 
 DESCRIBE users;
@@ -22,138 +22,212 @@ DESCRIBE brands;
 DESCRIBE products;
 DESCRIBE shipments;
 DESCRIBE content_deadlines;
+DESCRIBE audit_logs;
 
 
 -- =========================================================
--- 3. INSERT TEST DATA
+-- 3. CHECK TABLE RECORD COUNTS
 -- =========================================================
 
--- Insert sample users
-INSERT INTO users
-(full_name, email, password_hash)
-VALUES
-('Rohan Sharma', 'rohan@test.com', 'test_hash_123'),
-('Rahul Kumar', 'rahul@test.com', 'test_hash_456');
-
--- Then your brands, products, shipments,
--- and content_deadlines INSERT statements go here.
-
-
--- =========================================================
--- 4. CHECK INSERTED DATA
--- =========================================================
-
-SELECT * FROM users;
-SELECT * FROM brands;
-SELECT * FROM products;
-SELECT * FROM shipments;
-SELECT * FROM content_deadlines;
-
-
--- =========================================================
--- 5. ROW COUNT TEST
--- =========================================================
-
-SELECT 'users' AS table_name, COUNT(*) AS total_rows
-FROM users
-
+SELECT 'users' AS table_name, COUNT(*) AS total_rows FROM users
 UNION ALL
-
-SELECT 'brands', COUNT(*)
-FROM brands
-
+SELECT 'brands', COUNT(*) FROM brands
 UNION ALL
-
-SELECT 'products', COUNT(*)
-FROM products
-
+SELECT 'products', COUNT(*) FROM products
 UNION ALL
-
-SELECT 'shipments', COUNT(*)
-FROM shipments
-
+SELECT 'shipments', COUNT(*) FROM shipments
 UNION ALL
-
-SELECT 'content_deadlines', COUNT(*)
-FROM content_deadlines;
+SELECT 'content_deadlines', COUNT(*) FROM content_deadlines
+UNION ALL
+SELECT 'audit_logs', COUNT(*) FROM audit_logs;
 
 
 -- =========================================================
--- 6. RELATIONSHIP / JOIN TESTS
+-- 4. CHECK RELATIONSHIPS
 -- =========================================================
 
--- Test relationships between all major tables.
+-- Users and their brands
 SELECT
-    u.full_name AS user_name,
+    u.user_id,
+    u.full_name,
+    b.brand_id,
+    b.brand_name
+FROM users u
+LEFT JOIN brands b
+    ON u.user_id = b.user_id;
+
+
+-- Users, brands, and products
+SELECT
+    u.user_id,
+    u.full_name,
     b.brand_name,
-    p.product_name,
-    s.shipment_code,
-    cd.platform,
-    cd.due_date
+    p.product_id,
+    p.product_name
 FROM users u
 JOIN brands b
     ON u.user_id = b.user_id
 JOIN products p
-    ON b.brand_id = p.brand_id
+    ON b.brand_id = p.brand_id;
+
+
+-- Users, products, and shipments
+SELECT
+    u.user_id,
+    u.full_name,
+    s.shipment_id,
+    s.shipment_code,
+    s.status
+FROM users u
 JOIN shipments s
-    ON p.product_id = s.product_id
+    ON u.user_id = s.user_id;
+
+
+-- Users, shipments, and content deadlines
+SELECT
+    u.user_id,
+    u.full_name,
+    s.shipment_code,
+    cd.deadline_id,
+    cd.content_title,
+    cd.platform,
+    cd.due_date,
+    cd.completed_at
+FROM users u
 JOIN content_deadlines cd
-    ON s.shipment_id = cd.shipment_id;
+    ON u.user_id = cd.user_id
+JOIN shipments s
+    ON cd.shipment_id = s.shipment_id;
 
 
 -- =========================================================
--- 7. ORPHAN RECORD TESTS
+-- 5. ORPHAN RECORD TESTS
+-- Each query should return zero rows.
 -- =========================================================
 
--- Products without a valid brand.
-SELECT p.*
+-- Brands without a valid user
+SELECT b.brand_id, b.user_id
+FROM brands b
+LEFT JOIN users u
+    ON b.user_id = u.user_id
+WHERE u.user_id IS NULL;
+
+
+-- Products without a valid user
+SELECT p.product_id, p.user_id
+FROM products p
+LEFT JOIN users u
+    ON p.user_id = u.user_id
+WHERE u.user_id IS NULL;
+
+
+-- Products without a valid brand
+SELECT p.product_id, p.brand_id
 FROM products p
 LEFT JOIN brands b
     ON p.brand_id = b.brand_id
 WHERE b.brand_id IS NULL;
 
 
--- Shipments without a valid product.
-SELECT s.*
+-- Shipments without a valid user
+SELECT s.shipment_id, s.user_id
+FROM shipments s
+LEFT JOIN users u
+    ON s.user_id = u.user_id
+WHERE u.user_id IS NULL;
+
+
+-- Shipments without a valid product
+SELECT s.shipment_id, s.product_id
 FROM shipments s
 LEFT JOIN products p
     ON s.product_id = p.product_id
 WHERE p.product_id IS NULL;
 
 
--- Deadlines without a valid shipment.
-SELECT cd.*
+-- Content deadlines without a valid user
+SELECT cd.deadline_id, cd.user_id
+FROM content_deadlines cd
+LEFT JOIN users u
+    ON cd.user_id = u.user_id
+WHERE u.user_id IS NULL;
+
+
+-- Content deadlines without a valid shipment
+SELECT cd.deadline_id, cd.shipment_id
 FROM content_deadlines cd
 LEFT JOIN shipments s
     ON cd.shipment_id = s.shipment_id
 WHERE s.shipment_id IS NULL;
 
 
+-- Audit logs without a valid user
+SELECT al.audit_log_id, al.user_id
+FROM audit_logs al
+LEFT JOIN users u
+    ON al.user_id = u.user_id
+WHERE u.user_id IS NULL;
+
+
+-- Audit logs without a valid shipment
+SELECT al.audit_log_id, al.shipment_id
+FROM audit_logs al
+LEFT JOIN shipments s
+    ON al.shipment_id = s.shipment_id
+WHERE s.shipment_id IS NULL;
+
+
 -- =========================================================
--- 8. EXPLAIN / PERFORMANCE TESTS
+-- 6. CHECK PLATFORM OPTIONS
+-- =========================================================
+
+SHOW COLUMNS FROM content_deadlines LIKE 'platform';
+
+
+-- =========================================================
+-- 7. CHECK INDEXES
+-- =========================================================
+
+SHOW INDEX FROM users;
+SHOW INDEX FROM brands;
+SHOW INDEX FROM products;
+SHOW INDEX FROM shipments;
+SHOW INDEX FROM content_deadlines;
+SHOW INDEX FROM audit_logs;
+
+
+-- =========================================================
+-- 8. QUERY PERFORMANCE TESTS
 -- =========================================================
 
 EXPLAIN
 SELECT *
 FROM products
-WHERE brand_id = 1;
+WHERE user_id = 1
+  AND brand_id = 1;
+
 
 EXPLAIN
 SELECT *
 FROM shipments
-WHERE brand_id = 1;
+WHERE user_id = 1
+  AND product_id = 1;
+
 
 EXPLAIN
 SELECT *
 FROM content_deadlines
-WHERE shipment_id = 1;
+WHERE user_id = 1
+  AND shipment_id = 1;
+
+
+EXPLAIN
+SELECT *
+FROM audit_logs
+WHERE user_id = 1
+  AND shipment_id = 1;
 
 
 -- =========================================================
--- 9. INDEX CHECK
+-- END OF DATABASE VALIDATION TESTS
 -- =========================================================
-
-SHOW INDEX FROM brands;
-SHOW INDEX FROM products;
-SHOW INDEX FROM shipments;
-SHOW INDEX FROM content_deadlines;

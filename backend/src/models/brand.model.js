@@ -20,7 +20,7 @@ export async function getBrandById(brandId) {
         [brandId]
     );
 
-    return brands[0];
+    return brands[0] ?? null;
 }
 
 // Get brands by user ID
@@ -28,7 +28,10 @@ export async function getBrandsByUserId(userId) {
     const db = getDB();
 
     const [brands] = await db.query(
-        "SELECT * FROM brands WHERE user_id = ?",
+        `SELECT *
+         FROM brands
+         WHERE user_id = ?
+         ORDER BY created_at DESC`,
         [userId]
     );
 
@@ -39,17 +42,23 @@ export async function getBrandsByUserId(userId) {
 export async function createBrand(
     userId,
     brandName,
-    description,
-    websiteUrl,
-    logoUrl
+    description = null,
+    website = null,
+    logoUrl = null
 ) {
     const db = getDB();
 
     const [result] = await db.query(
         `INSERT INTO brands
-        (user_id, brand_name, description, website_url, logo_url)
+        (user_id, brand_name, description, website, logo_url)
         VALUES (?, ?, ?, ?, ?)`,
-        [userId, brandName, description, websiteUrl, logoUrl]
+        [
+            userId,
+            brandName,
+            description,
+            website,
+            logoUrl
+        ]
     );
 
     return result;
@@ -59,20 +68,26 @@ export async function createBrand(
 export async function updateBrand(
     brandId,
     brandName,
-    description,
-    websiteUrl,
-    logoUrl
+    description = null,
+    website = null,
+    logoUrl = null
 ) {
     const db = getDB();
 
     const [result] = await db.query(
         `UPDATE brands
-        SET brand_name = ?,
-            description = ?,
-            website_url = ?,
-            logo_url = ?
-        WHERE brand_id = ?`,
-        [brandName, description, websiteUrl, logoUrl, brandId]
+         SET brand_name = ?,
+             description = ?,
+             website = ?,
+             logo_url = ?
+         WHERE brand_id = ?`,
+        [
+            brandName,
+            description,
+            website,
+            logoUrl,
+            brandId
+        ]
     );
 
     return result;

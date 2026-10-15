@@ -11,6 +11,21 @@ export async function getAllContentDeadlines() {
     return deadlines;
 }
 
+// Get deadlines by user ID
+export async function getContentDeadlinesByUserId(userId) {
+    const db = getDB();
+
+    const [deadlines] = await db.query(
+        `SELECT *
+         FROM content_deadlines
+         WHERE user_id = ?
+         ORDER BY due_date ASC`,
+        [userId]
+    );
+
+    return deadlines;
+}
+
 // Get deadline by ID
 export async function getContentDeadlineById(deadlineId) {
     const db = getDB();
@@ -20,7 +35,7 @@ export async function getContentDeadlineById(deadlineId) {
         [deadlineId]
     );
 
-    return deadlines[0];
+    return deadlines[0] ?? null;
 }
 
 // Get deadlines by shipment ID
@@ -28,7 +43,10 @@ export async function getContentDeadlinesByShipmentId(shipmentId) {
     const db = getDB();
 
     const [deadlines] = await db.query(
-        "SELECT * FROM content_deadlines WHERE shipment_id = ?",
+        `SELECT *
+         FROM content_deadlines
+         WHERE shipment_id = ?
+         ORDER BY due_date ASC`,
         [shipmentId]
     );
 
@@ -37,26 +55,32 @@ export async function getContentDeadlinesByShipmentId(shipmentId) {
 
 // Create a new content deadline
 export async function createContentDeadline(
+    userId,
     shipmentId,
+    contentTitle,
     platform,
     dueDate,
-    status,
-    notes
+    status = "UPCOMING",
+    notes = null
 ) {
     const db = getDB();
 
     const [result] = await db.query(
         `INSERT INTO content_deadlines
         (
+            user_id,
             shipment_id,
+            content_title,
             platform,
             due_date,
             status,
             notes
         )
-        VALUES (?, ?, ?, ?, ?)`,
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
+            userId,
             shipmentId,
+            contentTitle,
             platform,
             dueDate,
             status,
@@ -70,6 +94,7 @@ export async function createContentDeadline(
 // Update a content deadline
 export async function updateContentDeadline(
     deadlineId,
+    contentTitle,
     platform,
     dueDate,
     status,
@@ -79,16 +104,24 @@ export async function updateContentDeadline(
 
     const [result] = await db.query(
         `UPDATE content_deadlines
-        SET platform = ?,
-            due_date = ?,
-            status = ?,
-            notes = ?
-        WHERE deadline_id = ?`,
+         SET content_title = ?,
+             platform = ?,
+             due_date = ?,
+             status = ?,
+             notes = ?,
+             completed_at = CASE
+                 WHEN ? = 'COMPLETED'
+                 THEN COALESCE(completed_at, CURRENT_TIMESTAMP)
+                 ELSE NULL
+             END
+         WHERE deadline_id = ?`,
         [
+            contentTitle,
             platform,
             dueDate,
             status,
             notes,
+            status,
             deadlineId
         ]
     );

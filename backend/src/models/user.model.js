@@ -1,57 +1,115 @@
 import { db } from "../config/databaseConfig.js";
 
 // Get all users
-async function getAllUsers() {
-    const db = getDB();
-
+export async function getAllUsers() {
     const [users] = await db.query(
-        "SELECT * FROM users"
+        `SELECT user_id, full_name, email, google_id, created_at
+         FROM users`
     );
 
     return users;
 }
 
 // Get user by ID
-async function getUserById(userId) {
-    const db = getDB();
-
+export async function getUserById(userId) {
     const [users] = await db.query(
-        "SELECT * FROM users WHERE user_id = ?",
+        `SELECT user_id, full_name, email, google_id, created_at
+         FROM users
+         WHERE user_id = ?`,
         [userId]
     );
 
-    return users[0];
+    return users[0] ?? null;
 }
 
 // Get user by email
-async function getUserByEmail(email) {
-    const db = getDB();
-
+export async function getUserByEmail(email) {
     const [users] = await db.query(
-        "SELECT * FROM users WHERE email = ?",
+        `SELECT *
+         FROM users
+         WHERE email = ?`,
         [email]
     );
 
-    return users[0];
+    return users[0] ?? null;
 }
 
-// Create a new user
-async function createUser(fullName, email, passwordHash) {
-    const db = getDB();
+// Get user by Google ID
+export async function getUserByGoogleId(googleId) {
+    const [users] = await db.query(
+        `SELECT *
+         FROM users
+         WHERE google_id = ?`,
+        [googleId]
+    );
 
+    return users[0] ?? null;
+}
+
+// Create a user with email and password
+export async function createUser(fullName, email, passwordHash) {
     const [result] = await db.query(
         `INSERT INTO users
-        (full_name, email, password_hash)
-        VALUES (?, ?, ?)`,
+            (full_name, email, password_hash)
+         VALUES (?, ?, ?)`,
         [fullName, email, passwordHash]
     );
 
     return result;
 }
 
-export {
-    getAllUsers,
-    getUserById,
-    getUserByEmail,
-    createUser
-};
+// Create a user with Google sign-in
+export async function createGoogleUser(fullName, email, googleId) {
+    const [result] = await db.query(
+        `INSERT INTO users
+            (full_name, email, google_id, password_hash)
+         VALUES (?, ?, ?, NULL)`,
+        [fullName, email, googleId]
+    );
+
+    return result;
+}
+
+// Save password-reset token details
+export async function savePasswordResetToken(
+    userId,
+    resetTokenHash,
+    expiresAt
+) {
+    const [result] = await db.query(
+        `UPDATE users
+         SET reset_token_hash = ?,
+             reset_token_expires_at = ?
+         WHERE user_id = ?`,
+        [resetTokenHash, expiresAt, userId]
+    );
+
+    return result;
+}
+
+// Clear password-reset token details
+export async function clearPasswordResetToken(userId) {
+    const [result] = await db.query(
+        `UPDATE users
+         SET reset_token_hash = NULL,
+             reset_token_expires_at = NULL
+         WHERE user_id = ?`,
+        [userId]
+    );
+
+    return result;
+}
+
+// Update password
+export async function updateUserPassword(userId, passwordHash) {
+    const [result] = await db.query(
+        `UPDATE users
+         SET password_hash = ?,
+             reset_token_hash = NULL,
+             reset_token_expires_at = NULL
+         WHERE user_id = ?`,
+        [passwordHash, userId]
+    );
+
+    return result;
+}
