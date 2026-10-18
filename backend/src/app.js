@@ -10,7 +10,7 @@ import brandRouter from "./routers/brand.route.js";
 import productRouter from "./routers/product.route.js";
 import shipmentRouter from "./routers/shipment.route.js";
 import contentDeadlineRouter from "./routers/deadline.route.js";
-// import healthRouter from "./routers/healthcheack.route.js";
+import healthRouter from "./routers/healthcheck.route.js";
 
 import { notFoundMiddleware } from "./middlewares/notFound.middleware.js";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
@@ -36,7 +36,7 @@ app.use((req, res, next) => {
 });
 
 // Health check
-// app.use("/api/v1/health", healthRouter);
+app.use("/api/v1/health", healthRouter);
 
 // Authentication
 app.use("/api/v1/auth", authRouter);
