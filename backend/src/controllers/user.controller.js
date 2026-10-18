@@ -117,12 +117,12 @@ export const loginUser = asyncHandler(async (req, res) => {
     delete user.password_hash;
 
     // Store token in cookie
-    res.cookie("accessToken", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 24 * 60 * 60 * 1000
-    });
+    // res.cookie("accessToken", token, {
+    //     httpOnly: true,
+    //     secure: process.env.NODE_ENV === "production",
+    //     sameSite: "lax",
+    //     maxAge: 24 * 60 * 60 * 1000
+    // });
 
     return res.status(200).json(
         new apiResponse(
