@@ -1,11 +1,11 @@
 import { Router } from "express";
 
-import authRoutes from "./auth.routes.js";
-import brandRoutes from "./brand.routes.js";
-import productRoutes from "./product.routes.js";
-import shipmentRoutes from "./shipment.routes.js";
-import deadlineRoutes from "./deadline.routes.js";
-import dashboardRoutes from "./dashboard.routes.js";
+import authRoutes from "./auth.route.js";
+import brandRoutes from "./brand.route.js";
+import productRoutes from "./product.route.js";
+import shipmentRoutes from "./shipment.route.js";
+import deadlineRoutes from "./deadline.route.js";
+import dashboardRoutes from "./dashboard.route.js";
 
 const router = Router();
 
