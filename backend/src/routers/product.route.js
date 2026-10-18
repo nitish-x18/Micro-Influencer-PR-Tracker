@@ -1,70 +1,31 @@
-import express from "express";
-
+import { Router } from "express";
 import {
-    getAllProductsController,
-    getProductByIdController,
-    getProductsByBrandIdController,
-    createProductController,
-    updateProductController,
-    deleteProductController
+    createProduct,
+    getProducts,
+    getProductById,
+    updateProduct,
+    deleteProduct
 } from "../controllers/product.controller.js";
 
-import { authenticateUser } from "../middlewares/auth.middleware.js";
-import { verifyBrandOwnership } from "../middlewares/brand.middleware.js";
+import { authenticateUser } from "../middlewares/authenticateUser.js";
+import { validateRequest } from "../middlewares/validateRequest.js";
 
-const router = express.Router();
+import {
+    createProductValidator,
+    updateProductValidator
+} from "../validators/product.validator.js";
 
+const router = Router();
 
-// All product routes require authentication
 router.use(authenticateUser);
 
+router.route("/")
+    .post(validateRequest(createProductValidator), createProduct)
+    .get(getProducts);
 
-// Get all products
-router.get(
-    "/",
-    getAllProductsController
-);
-
-
-// Get products belonging to a brand
-// Ownership is checked before returning them
-router.get(
-    "/brand/:brandId",
-    verifyBrandOwnership,
-    getProductsByBrandIdController
-);
-
-
-// Create product for a brand
-// User must own the brand
-router.post(
-    "/brand/:brandId",
-    verifyBrandOwnership,
-    createProductController
-);
-
-
-// Get product by ID
-router.get(
-    "/:productId",
-    getProductByIdController
-);
-
-
-// Update product
-// Controller verifies that the logged-in user owns the product's brand
-router.put(
-    "/:productId",
-    updateProductController
-);
-
-
-// Delete product
-// Controller verifies that the logged-in user owns the product's brand
-router.delete(
-    "/:productId",
-    deleteProductController
-);
-
+router.route("/:productId")
+    .get(getProductById)
+    .patch(validateRequest(updateProductValidator), updateProduct)
+    .delete(deleteProduct);
 
 export default router;

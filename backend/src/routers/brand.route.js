@@ -1,39 +1,31 @@
 import { Router } from "express";
-
 import {
+    createBrand,
     getBrands,
-    getBrand,
-    getMyBrands,
-    createNewBrand,
-    updateExistingBrand,
-    removeBrand
+    getBrandById,
+    updateBrand,
+    deleteBrand
 } from "../controllers/brand.controller.js";
 
-import { authenticateUser } from "../middlewares/auth.middleware.js";
-import { verifyBrandOwnership } from "../middlewares/brand.middleware.js";
+import { authenticateUser } from "../middlewares/authenticateUser.js";
+import { validateRequest } from "../middlewares/validateRequest.js";
+
+import {
+    createBrandValidator,
+    updateBrandValidator
+} from "../validators/brand.validator.js";
 
 const router = Router();
 
 router.use(authenticateUser);
 
-router.get("/", getBrands);
+router.route("/")
+    .post(validateRequest(createBrandValidator), createBrand)
+    .get(getBrands);
 
-router.get("/my", getMyBrands);
-
-router.get("/:brandId", verifyBrandOwnership, getBrand);
-
-router.post("/", createNewBrand);
-
-router.put(
-    "/:brandId",
-    verifyBrandOwnership,
-    updateExistingBrand
-);
-
-router.delete(
-    "/:brandId",
-    verifyBrandOwnership,
-    removeBrand
-);
+router.route("/:brandId")
+    .get(getBrandById)
+    .patch(validateRequest(updateBrandValidator), updateBrand)
+    .delete(deleteBrand);
 
 export default router;
