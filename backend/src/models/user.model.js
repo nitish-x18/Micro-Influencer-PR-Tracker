@@ -1,7 +1,9 @@
-import { db } from "../config/databaseConfig.js";
+import { getDB } from "../config/databaseConfig.js";
 
 // Get all users
 export async function getAllUsers() {
+    const db = getDB();
+
     const [users] = await db.query(
         `SELECT user_id, full_name, email, google_id, created_at
          FROM users`
@@ -12,6 +14,8 @@ export async function getAllUsers() {
 
 // Get user by ID
 export async function getUserById(userId) {
+    const db = getDB();
+
     const [users] = await db.query(
         `SELECT user_id, full_name, email, google_id, created_at
          FROM users
@@ -24,6 +28,8 @@ export async function getUserById(userId) {
 
 // Get user by email
 export async function getUserByEmail(email) {
+    const db = getDB();
+
     const [users] = await db.query(
         `SELECT *
          FROM users
@@ -36,6 +42,8 @@ export async function getUserByEmail(email) {
 
 // Get user by Google ID
 export async function getUserByGoogleId(googleId) {
+    const db = getDB();
+
     const [users] = await db.query(
         `SELECT *
          FROM users
@@ -48,6 +56,8 @@ export async function getUserByGoogleId(googleId) {
 
 // Create a user with email and password
 export async function createUser(fullName, email, passwordHash) {
+    const db = getDB();
+
     const [result] = await db.query(
         `INSERT INTO users
             (full_name, email, password_hash)
@@ -60,6 +70,8 @@ export async function createUser(fullName, email, passwordHash) {
 
 // Create a user with Google sign-in
 export async function createGoogleUser(fullName, email, googleId) {
+    const db = getDB();
+
     const [result] = await db.query(
         `INSERT INTO users
             (full_name, email, google_id, password_hash)
@@ -76,6 +88,8 @@ export async function savePasswordResetToken(
     resetTokenHash,
     expiresAt
 ) {
+    const db = getDB();
+
     const [result] = await db.query(
         `UPDATE users
          SET reset_token_hash = ?,
@@ -89,6 +103,8 @@ export async function savePasswordResetToken(
 
 // Clear password-reset token details
 export async function clearPasswordResetToken(userId) {
+    const db = getDB();
+
     const [result] = await db.query(
         `UPDATE users
          SET reset_token_hash = NULL,
@@ -102,6 +118,8 @@ export async function clearPasswordResetToken(userId) {
 
 // Update password
 export async function updateUserPassword(userId, passwordHash) {
+    const db = getDB();
+
     const [result] = await db.query(
         `UPDATE users
          SET password_hash = ?,

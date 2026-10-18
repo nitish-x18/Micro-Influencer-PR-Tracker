@@ -19,6 +19,9 @@ const db = mysql.createPool({
     queueLimit: 0
 });
 
+// Return the shared database pool
+const getDB = () => db;
+
 const connectDB = async () => {
     try {
         const [rows] = await db.query(
@@ -33,4 +36,4 @@ const connectDB = async () => {
     }
 };
 
-export { db, connectDB };
+export { db, getDB, connectDB };
