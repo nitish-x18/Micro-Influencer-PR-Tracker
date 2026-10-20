@@ -73,6 +73,7 @@ const validateProductData = (data, isUpdate = false) => {
 
 const getOwnedProduct = async (productId, userId) => {
     const id = parseId(productId, "product ID");
+
     const product = await productModel.getProductById(id);
 
     if (!product || String(product.user_id) !== String(userId)) {
@@ -85,7 +86,6 @@ const getOwnedProduct = async (productId, userId) => {
 const verifyOwnedBrand = async (brandId, userId) => {
     const id = parseId(brandId, "brand ID");
 
-    // This expects brand.model.js to export getBrandById().
     const brand = await brandModel.getBrandById(id);
 
     if (!brand || String(brand.user_id) !== String(userId)) {
@@ -121,12 +121,12 @@ export const getProducts = async (userId) => {
 };
 
 // Get a single product for current user
-export const getProductById = async (productId, userId) => {
+export const getProductById = async (userId, productId) => {
     return getOwnedProduct(productId, userId);
 };
 
 // Update product
-export const updateProduct = async (productId, userId, data) => {
+export const updateProduct = async (userId, productId, data) => {
     const existingProduct = await getOwnedProduct(productId, userId);
 
     validateProductData(data, true);
@@ -160,7 +160,6 @@ export const updateProduct = async (productId, userId, data) => {
     );
 
     if (!result.affectedRows) {
-        // MySQL can report zero affected rows when values are unchanged.
         const refreshed = await productModel.getProductById(
             existingProduct.product_id
         );
@@ -176,7 +175,7 @@ export const updateProduct = async (productId, userId, data) => {
 };
 
 // Delete product
-export const deleteProduct = async (productId, userId) => {
+export const deleteProduct = async (userId, productId) => {
     const product = await getOwnedProduct(productId, userId);
 
     const result = await productModel.deleteProduct(product.product_id);
@@ -185,5 +184,7 @@ export const deleteProduct = async (productId, userId) => {
         throw new apiError(404, "Product not found");
     }
 
-    return { product_id: product.product_id };
+    return {
+        product_id: product.product_id
+    };
 };
