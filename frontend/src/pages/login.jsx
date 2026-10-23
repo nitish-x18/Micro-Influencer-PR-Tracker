@@ -2,6 +2,7 @@ import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/influenceflow-logo.png";
+import { api } from "../services/api";
 
 function Login() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ function Login() {
     setSuccess("");
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (isSubmitting) {
@@ -39,7 +40,6 @@ function Login() {
     const email = form.email.trim().toLowerCase();
     const password = form.password;
 
-    // Email validation
     if (!email) {
       setError("Please enter your email.");
       return;
@@ -50,63 +50,63 @@ function Login() {
       return;
     }
 
-    // Password validation
     if (!password) {
       setError("Please enter your password.");
       return;
     }
 
-    let savedUser = null;
+    setIsSubmitting(true);
+    setError("");
+    setSuccess("");
 
     try {
-      savedUser = JSON.parse(localStorage.getItem("influenceflow_user"));
-    } catch {
-      localStorage.removeItem("influenceflow_user");
+      const response = await api.post("/auth/login", {
+        email,
+        password,
+      });
+
+      const data = response?.data;
+      const token = data?.accessToken;
+
+      if (!token) {
+        throw new Error(
+          "Login successful, but access token was not received.",
+        );
+      }
+
+      const user = data?.user;
+
+      const session = {
+        fullName: user?.fullName || user?.full_name || "",
+        email: user?.email || email,
+      };
+
+      const sessionData = JSON.stringify(session);
+
+      if (form.remember) {
+        localStorage.setItem("influenceflow_token", token);
+        localStorage.setItem("influenceflow_session", sessionData);
+
+        sessionStorage.removeItem("influenceflow_token");
+        sessionStorage.removeItem("influenceflow_session");
+      } else {
+        sessionStorage.setItem("influenceflow_token", token);
+        sessionStorage.setItem("influenceflow_session", sessionData);
+
+        localStorage.removeItem("influenceflow_token");
+        localStorage.removeItem("influenceflow_session");
+      }
+
+      setSuccess("Login successful. Redirecting...");
+
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 800);
+    } catch (error) {
+      setError(error.message || "Login failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (!savedUser) {
-      setError("No account found. Please create an account first.");
-      return;
-    }
-
-    // Credential check
-    if (savedUser.email !== email || savedUser.password !== password) {
-      setError("Incorrect email or password.");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    const session = {
-      fullName: savedUser.fullName,
-      email: savedUser.email,
-    };
-
-    const sessionData = JSON.stringify(session);
-
-    /*
-      Temporary frontend authentication.
-
-      If "Keep me signed in" is checked, keep the session
-      in localStorage.
-
-      Otherwise use sessionStorage for the current browser tab.
-    */
-    if (form.remember) {
-      localStorage.setItem("influenceflow_session", sessionData);
-
-      sessionStorage.removeItem("influenceflow_session");
-    } else {
-      sessionStorage.setItem("influenceflow_session", sessionData);
-
-      localStorage.removeItem("influenceflow_session");
-    }
-
-    setSuccess("Login successful. Redirecting...");
-
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 800);
   };
 
   const handleForgotPassword = () => {

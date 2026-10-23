@@ -2,6 +2,7 @@ import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/influenceflow-logo.png";
+import { api } from "../services/api";
 
 function Register() {
   const navigate = useNavigate();
@@ -33,59 +34,34 @@ function Register() {
     setSuccess("");
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (isSubmitting) {
-      return;
-    }
+    if (isSubmitting) return;
 
     const fullName = form.fullName.trim();
     const email = form.email.trim().toLowerCase();
     const password = form.password;
     const confirmPassword = form.confirmPassword;
 
-    // Full name
-    if (!fullName) {
-      setError("Please enter your full name.");
-      return;
-    }
-
-    if (fullName.length < 2) {
+    if (!fullName || fullName.length < 2) {
       setError("Please enter a valid full name.");
       return;
     }
 
-    // Email
-    if (!email) {
-      setError("Please enter your email.");
-      return;
-    }
-
-    if (!/\S+@\S+\.\S+/.test(email)) {
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setError("Please enter a valid email address.");
       return;
     }
 
-    // Password
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
-      return;
-    }
-
-    if (!/\d/.test(password)) {
-      setError("Password must contain at least one number.");
-      return;
-    }
-
-    if (!/[!@#$%^&*]/.test(password)) {
-      setError("Password must contain at least one symbol.");
-      return;
-    }
-
-    // Confirm password
-    if (!confirmPassword) {
-      setError("Please confirm your password.");
+    if (
+      password.length < 8 ||
+      !/\d/.test(password) ||
+      !/[!@#$%^&*]/.test(password)
+    ) {
+      setError(
+        "Password must have at least 8 characters, a number and a symbol.",
+      );
       return;
     }
 
@@ -94,44 +70,36 @@ function Register() {
       return;
     }
 
-    // Terms
     if (!form.terms) {
       setError("Please agree to the Terms and Privacy Policy.");
       return;
     }
 
-    // Existing account
-    let existingUser = null;
+    setIsSubmitting(true);
+    setError("");
+    setSuccess("");
 
     try {
-      existingUser = JSON.parse(localStorage.getItem("influenceflow_user"));
-    } catch {
-      localStorage.removeItem("influenceflow_user");
+      const response = await api.post("/auth/register", {
+        full_name: fullName,
+        email,
+        password,
+      });
+
+      if (response?.success === false) {
+        throw new Error(response.message || "Registration failed.");
+      }
+
+      setSuccess("Account created successfully. Redirecting to login...");
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1200);
+    } catch (error) {
+      setError(error.message || "Registration failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (existingUser?.email === email) {
-      setError("An account with this email already exists.");
-      return;
-    }
-
-    // Prevent multiple submissions
-    setIsSubmitting(true);
-
-    const user = {
-      fullName,
-      email,
-      password,
-    };
-
-    // Temporary frontend-only account storage.
-    // This will be replaced by the backend API later.
-    localStorage.setItem("influenceflow_user", JSON.stringify(user));
-
-    setSuccess("Account created successfully. Redirecting to login...");
-
-    setTimeout(() => {
-      navigate("/login");
-    }, 1200);
   };
 
   const handleGoogleSignup = () => {

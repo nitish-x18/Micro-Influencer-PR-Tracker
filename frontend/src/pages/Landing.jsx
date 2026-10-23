@@ -77,21 +77,35 @@ function Landing() {
                 </p>
 
                 <div className="mt-7 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={handleGetStarted}
-                    className="inline-flex items-center gap-2 rounded-md bg-[#e56b3e] px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-[#d85d31]"
-                  >
-                    {session ? "Go to dashboard" : "Get started free"}
-                    <ArrowRight size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSignIn}
-                    className="rounded-md border border-slate-500 bg-transparent px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                  >
-                    {session ? "Go to dashboard" : "Sign in"}
-                  </button>
+                  {session ? (
+                    <button
+                      type="button"
+                      onClick={() => navigate("/dashboard")}
+                      className="inline-flex items-center gap-2 rounded-md bg-[#e56b3e] px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-[#d85d31]"
+                    >
+                      Go to dashboard
+                      <ArrowRight size={16} />
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleGetStarted}
+                        className="inline-flex items-center gap-2 rounded-md bg-[#e56b3e] px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-[#d85d31]"
+                      >
+                        Get started free
+                        <ArrowRight size={16} />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleSignIn}
+                        className="rounded-md border border-slate-500 bg-transparent px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                      >
+                        Sign in
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 <div className="mt-5 flex flex-wrap gap-2">
