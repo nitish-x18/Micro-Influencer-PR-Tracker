@@ -18,6 +18,7 @@ export const getDashboard = async (userId) => {
     ]);
 
     const today = new Date();
+
     const todayString = [
         today.getFullYear(),
         String(today.getMonth() + 1).padStart(2, "0"),
@@ -33,7 +34,9 @@ export const getDashboard = async (userId) => {
 
         const date = new Date(value);
 
-        if (Number.isNaN(date.getTime())) return null;
+        if (Number.isNaN(date.getTime())) {
+            return null;
+        }
 
         return [
             date.getFullYear(),
@@ -41,6 +44,10 @@ export const getDashboard = async (userId) => {
             String(date.getDate()).padStart(2, "0")
         ].join("-");
     };
+
+    // -----------------------------
+    // Deadline calculations
+    // -----------------------------
 
     const completedDeadlines = deadlines.filter(
         (deadline) =>
@@ -74,6 +81,10 @@ export const getDashboard = async (userId) => {
         return dueDate && dueDate >= todayString;
     });
 
+    // -----------------------------
+    // Shipment calculations
+    // -----------------------------
+
     const receivedShipments = shipments.filter(
         (shipment) => shipment.status === "RECEIVED"
     );
@@ -82,31 +93,141 @@ export const getDashboard = async (userId) => {
         (shipment) => shipment.status === "SHIPPED"
     );
 
+    // SHIPPED = currently in transit
+    const activeShipments = shippedShipments.length;
+
+    // -----------------------------
+    // Product value calculation
+    // -----------------------------
+
+    const productValueByCurrency = {};
+
+    products.forEach((product) => {
+        const currency = String(product.currency || "INR").toUpperCase();
+        const value = Number(product.value || 0);
+
+        if (!productValueByCurrency[currency]) {
+            productValueByCurrency[currency] = 0;
+        }
+
+        productValueByCurrency[currency] += value;
+    });
+
+    // If all products use the same currency,
+    // this gives the value expected by the dashboard.
+    const currencies = Object.keys(productValueByCurrency);
+
+    const totalProductValue =
+        currencies.length === 1
+            ? productValueByCurrency[currencies[0]]
+            : null;
+
+    const totalProductValueCurrency =
+        currencies.length === 1
+            ? currencies[0]
+            : null;
+
+    // -----------------------------
+    // Deadlines by week
+    // -----------------------------
+
+    const deadlinesByWeek = {
+        W1: 0,
+        W2: 0,
+        W3: 0,
+        W4: 0,
+        W5: 0
+    };
+
+    upcomingDeadlines.forEach((deadline) => {
+        const dueDate = getDateString(deadline.due_date);
+
+        if (!dueDate) return;
+
+        const day = Number(dueDate.slice(8, 10));
+
+        if (day >= 1 && day <= 7) {
+            deadlinesByWeek.W1++;
+        } else if (day >= 8 && day <= 14) {
+            deadlinesByWeek.W2++;
+        } else if (day >= 15 && day <= 21) {
+            deadlinesByWeek.W3++;
+        } else if (day >= 22 && day <= 28) {
+            deadlinesByWeek.W4++;
+        } else if (day >= 29) {
+            deadlinesByWeek.W5++;
+        }
+    });
+
+    // -----------------------------
+    // Recent shipments
+    // -----------------------------
+
+    const recentShipments = [...shipments]
+        .sort((a, b) => {
+            const dateA = new Date(a.shipped_at || 0).getTime();
+            const dateB = new Date(b.shipped_at || 0).getTime();
+
+            return dateB - dateA;
+        })
+        .slice(0, 5);
+
+    // -----------------------------
+    // Upcoming deadlines list
+    // -----------------------------
+
+    const upcomingDeadlinesList = [...upcomingDeadlines]
+        .sort((a, b) =>
+            String(a.due_date).localeCompare(String(b.due_date))
+        )
+        .slice(0, 5);
+
+    // -----------------------------
+    // Overdue deadlines list
+    // -----------------------------
+
+    const overdueDeadlinesList = [...overdueDeadlines]
+        .sort((a, b) =>
+            String(a.due_date).localeCompare(String(b.due_date))
+        )
+        .slice(0, 5);
+
+    // -----------------------------
+    // Dashboard response
+    // -----------------------------
+
     return {
         summary: {
             totalBrands: brands.length,
             totalProducts: products.length,
             totalShipments: shipments.length,
+
             shippedShipments: shippedShipments.length,
             receivedShipments: receivedShipments.length,
+
+            // Currently in transit
+            activeShipments,
+
             totalDeadlines: deadlines.length,
             upcomingDeadlines: upcomingDeadlines.length,
             overdueDeadlines: overdueDeadlines.length,
-            completedDeadlines: completedDeadlines.length
+            completedDeadlines: completedDeadlines.length,
+
+            totalProductValue,
+            totalProductValueCurrency,
+            productValueByCurrency,
+
+            deadlinesByWeek
         },
-        recentShipments: shipments.slice(0, 5),
-        upcomingDeadlinesList: upcomingDeadlines
-            .sort((a, b) =>
-                String(a.due_date).localeCompare(String(b.due_date))
-            )
-            .slice(0, 5),
-        overdueDeadlinesList: overdueDeadlines
-            .sort((a, b) =>
-                String(a.due_date).localeCompare(String(b.due_date))
-            )
-            .slice(0, 5)
+
+        recentShipments,
+
+        upcomingDeadlinesList,
+
+        overdueDeadlinesList
     };
 };
+
 
 // Get dashboard deadline lists
 export const getDashboardDeadlines = async (userId) => {
@@ -114,6 +235,7 @@ export const getDashboardDeadlines = async (userId) => {
         await deadlineModel.getContentDeadlinesByUserId(userId);
 
     const today = new Date();
+
     const todayString = [
         today.getFullYear(),
         String(today.getMonth() + 1).padStart(2, "0"),
@@ -122,11 +244,16 @@ export const getDashboardDeadlines = async (userId) => {
 
     const getDateString = (value) => {
         if (!value) return null;
-        if (typeof value === "string") return value.slice(0, 10);
+
+        if (typeof value === "string") {
+            return value.slice(0, 10);
+        }
 
         const date = new Date(value);
 
-        if (Number.isNaN(date.getTime())) return null;
+        if (Number.isNaN(date.getTime())) {
+            return null;
+        }
 
         return [
             date.getFullYear(),
@@ -135,8 +262,8 @@ export const getDashboardDeadlines = async (userId) => {
         ].join("-");
     };
 
-    return {
-        upcoming: deadlines.filter((deadline) => {
+    const upcoming = deadlines
+        .filter((deadline) => {
             if (
                 deadline.status === "COMPLETED" ||
                 deadline.completed_at
@@ -147,8 +274,13 @@ export const getDashboardDeadlines = async (userId) => {
             const dueDate = getDateString(deadline.due_date);
 
             return dueDate && dueDate >= todayString;
-        }),
-        overdue: deadlines.filter((deadline) => {
+        })
+        .sort((a, b) =>
+            String(a.due_date).localeCompare(String(b.due_date))
+        );
+
+    const overdue = deadlines
+        .filter((deadline) => {
             if (
                 deadline.status === "COMPLETED" ||
                 deadline.completed_at
@@ -160,5 +292,12 @@ export const getDashboardDeadlines = async (userId) => {
 
             return dueDate && dueDate < todayString;
         })
+        .sort((a, b) =>
+            String(a.due_date).localeCompare(String(b.due_date))
+        );
+
+    return {
+        upcoming,
+        overdue
     };
 };

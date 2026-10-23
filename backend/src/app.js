@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
+import dashboardRouter from "./routers/dashboard.route.js";
 import indexRouter from "./routers/index.route.js";
 import authRouter from "./routers/auth.route.js";
 import brandRouter from "./routers/brand.route.js";
@@ -42,6 +43,7 @@ app.use("/api/v1/health", healthRouter);
 app.use("/api/v1/auth", authRouter);
 
 // Other API routes
+app.use("/api/v1/dashboard", dashboardRouter);
 app.use("/api/v1/brands", brandRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/shipments", shipmentRouter);

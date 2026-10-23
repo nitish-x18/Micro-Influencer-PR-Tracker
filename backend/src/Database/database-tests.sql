@@ -1,22 +1,10 @@
--- =========================================================
--- MICRO-INFLUENCER PR PACKAGE TRACKER
--- DATABASE VALIDATION TESTS
--- =========================================================
-
+-- InfluenceFlow database verification
 USE microinfluencer_db;
 
-
--- =========================================================
--- 1. CHECK ALL TABLES
--- =========================================================
-
+-- Check all tables
 SHOW TABLES;
 
-
--- =========================================================
--- 2. CHECK ALL TABLE STRUCTURES
--- =========================================================
-
+-- Check table structures
 DESCRIBE users;
 DESCRIBE brands;
 DESCRIBE products;
@@ -24,170 +12,23 @@ DESCRIBE shipments;
 DESCRIBE content_deadlines;
 DESCRIBE audit_logs;
 
-
--- =========================================================
--- 3. CHECK TABLE RECORD COUNTS
--- =========================================================
-
+-- Count records
 SELECT 'users' AS table_name, COUNT(*) AS total_rows FROM users
-UNION ALL
-SELECT 'brands', COUNT(*) FROM brands
-UNION ALL
-SELECT 'products', COUNT(*) FROM products
-UNION ALL
-SELECT 'shipments', COUNT(*) FROM shipments
-UNION ALL
-SELECT 'content_deadlines', COUNT(*) FROM content_deadlines
-UNION ALL
-SELECT 'audit_logs', COUNT(*) FROM audit_logs;
+UNION ALL SELECT 'brands', COUNT(*) FROM brands
+UNION ALL SELECT 'products', COUNT(*) FROM products
+UNION ALL SELECT 'shipments', COUNT(*) FROM shipments
+UNION ALL SELECT 'content_deadlines', COUNT(*) FROM content_deadlines
+UNION ALL SELECT 'audit_logs', COUNT(*) FROM audit_logs;
 
+-- Check foreign keys
+SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME,
+       REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
+FROM information_schema.KEY_COLUMN_USAGE
+WHERE TABLE_SCHEMA = 'microinfluencer_db'
+  AND REFERENCED_TABLE_NAME IS NOT NULL
+ORDER BY TABLE_NAME, COLUMN_NAME;
 
--- =========================================================
--- 4. CHECK RELATIONSHIPS
--- =========================================================
-
--- Users and their brands
-SELECT
-    u.user_id,
-    u.full_name,
-    b.brand_id,
-    b.brand_name
-FROM users u
-LEFT JOIN brands b
-    ON u.user_id = b.user_id;
-
-
--- Users, brands, and products
-SELECT
-    u.user_id,
-    u.full_name,
-    b.brand_name,
-    p.product_id,
-    p.product_name
-FROM users u
-JOIN brands b
-    ON u.user_id = b.user_id
-JOIN products p
-    ON b.brand_id = p.brand_id;
-
-
--- Users, products, and shipments
-SELECT
-    u.user_id,
-    u.full_name,
-    s.shipment_id,
-    s.shipment_code,
-    s.status
-FROM users u
-JOIN shipments s
-    ON u.user_id = s.user_id;
-
-
--- Users, shipments, and content deadlines
-SELECT
-    u.user_id,
-    u.full_name,
-    s.shipment_code,
-    cd.deadline_id,
-    cd.content_title,
-    cd.platform,
-    cd.due_date,
-    cd.completed_at
-FROM users u
-JOIN content_deadlines cd
-    ON u.user_id = cd.user_id
-JOIN shipments s
-    ON cd.shipment_id = s.shipment_id;
-
-
--- =========================================================
--- 5. ORPHAN RECORD TESTS
--- Each query should return zero rows.
--- =========================================================
-
--- Brands without a valid user
-SELECT b.brand_id, b.user_id
-FROM brands b
-LEFT JOIN users u
-    ON b.user_id = u.user_id
-WHERE u.user_id IS NULL;
-
-
--- Products without a valid user
-SELECT p.product_id, p.user_id
-FROM products p
-LEFT JOIN users u
-    ON p.user_id = u.user_id
-WHERE u.user_id IS NULL;
-
-
--- Products without a valid brand
-SELECT p.product_id, p.brand_id
-FROM products p
-LEFT JOIN brands b
-    ON p.brand_id = b.brand_id
-WHERE b.brand_id IS NULL;
-
-
--- Shipments without a valid user
-SELECT s.shipment_id, s.user_id
-FROM shipments s
-LEFT JOIN users u
-    ON s.user_id = u.user_id
-WHERE u.user_id IS NULL;
-
-
--- Shipments without a valid product
-SELECT s.shipment_id, s.product_id
-FROM shipments s
-LEFT JOIN products p
-    ON s.product_id = p.product_id
-WHERE p.product_id IS NULL;
-
-
--- Content deadlines without a valid user
-SELECT cd.deadline_id, cd.user_id
-FROM content_deadlines cd
-LEFT JOIN users u
-    ON cd.user_id = u.user_id
-WHERE u.user_id IS NULL;
-
-
--- Content deadlines without a valid shipment
-SELECT cd.deadline_id, cd.shipment_id
-FROM content_deadlines cd
-LEFT JOIN shipments s
-    ON cd.shipment_id = s.shipment_id
-WHERE s.shipment_id IS NULL;
-
-
--- Audit logs without a valid user
-SELECT al.audit_log_id, al.user_id
-FROM audit_logs al
-LEFT JOIN users u
-    ON al.user_id = u.user_id
-WHERE u.user_id IS NULL;
-
-
--- Audit logs without a valid shipment
-SELECT al.audit_log_id, al.shipment_id
-FROM audit_logs al
-LEFT JOIN shipments s
-    ON al.shipment_id = s.shipment_id
-WHERE s.shipment_id IS NULL;
-
-
--- =========================================================
--- 6. CHECK PLATFORM OPTIONS
--- =========================================================
-
-SHOW COLUMNS FROM content_deadlines LIKE 'platform';
-
-
--- =========================================================
--- 7. CHECK INDEXES
--- =========================================================
-
+-- Check indexes
 SHOW INDEX FROM users;
 SHOW INDEX FROM brands;
 SHOW INDEX FROM products;
@@ -195,39 +36,94 @@ SHOW INDEX FROM shipments;
 SHOW INDEX FROM content_deadlines;
 SHOW INDEX FROM audit_logs;
 
+-- Brands and their owners
+SELECT b.brand_id, b.brand_name, u.full_name, u.email
+FROM brands b
+JOIN users u ON u.user_id = b.user_id;
 
--- =========================================================
--- 8. QUERY PERFORMANCE TESTS
--- =========================================================
+-- Products and their brands
+SELECT p.product_id, p.product_name, p.value,
+       p.currency, b.brand_name
+FROM products p
+JOIN brands b ON b.brand_id = p.brand_id;
 
+-- Shipments, products, and brands
+SELECT s.shipment_code, s.status, s.shipped_at,
+       s.tracking_number, s.received_at,
+       p.product_name, b.brand_name
+FROM shipments s
+JOIN products p ON p.product_id = s.product_id
+LEFT JOIN brands b ON b.brand_id = s.brand_id;
+
+-- Content deadlines
+SELECT cd.deadline_id, cd.content_title, cd.platform,
+       cd.due_date, cd.status, s.shipment_code
+FROM content_deadlines cd
+JOIN shipments s ON s.shipment_id = cd.shipment_id
+ORDER BY cd.due_date;
+
+-- Orphan brands: should return zero
+SELECT COUNT(*) AS orphan_brands
+FROM brands b
+LEFT JOIN users u ON u.user_id = b.user_id
+WHERE u.user_id IS NULL;
+
+-- Orphan products: should return zero
+SELECT COUNT(*) AS orphan_products
+FROM products p
+LEFT JOIN brands b ON b.brand_id = p.brand_id
+WHERE b.brand_id IS NULL;
+
+-- Orphan shipments: should return zero
+SELECT COUNT(*) AS orphan_shipments
+FROM shipments s
+LEFT JOIN products p ON p.product_id = s.product_id
+WHERE p.product_id IS NULL;
+
+-- Orphan deadlines: should return zero
+SELECT COUNT(*) AS orphan_deadlines
+FROM content_deadlines cd
+LEFT JOIN shipments s ON s.shipment_id = cd.shipment_id
+WHERE s.shipment_id IS NULL;
+
+-- Check product and brand owner consistency: should return zero
+SELECT COUNT(*) AS owner_mismatches
+FROM products p
+JOIN brands b ON b.brand_id = p.brand_id
+WHERE p.user_id <> b.user_id;
+
+-- Check shipment and product owner consistency: should return zero
+SELECT COUNT(*) AS shipment_owner_mismatches
+FROM shipments s
+JOIN products p ON p.product_id = s.product_id
+WHERE s.user_id <> p.user_id;
+
+-- Compare stored deadline status with calculated status
+SELECT deadline_id, content_title, due_date, completed_at,
+       status AS stored_status,
+       CASE
+         WHEN completed_at IS NOT NULL THEN 'COMPLETED'
+         WHEN due_date < CURRENT_DATE() THEN 'OVERDUE'
+         ELSE 'UPCOMING'
+       END AS calculated_status
+FROM content_deadlines;
+
+-- Query performance plans
 EXPLAIN
-SELECT *
-FROM products
-WHERE user_id = 1
-  AND brand_id = 1;
-
-
-EXPLAIN
-SELECT *
-FROM shipments
-WHERE user_id = 1
-  AND product_id = 1;
-
-
-EXPLAIN
-SELECT *
+SELECT deadline_id, content_title, platform, due_date
 FROM content_deadlines
 WHERE user_id = 1
-  AND shipment_id = 1;
-
+  AND completed_at IS NULL
+  AND due_date < CURRENT_DATE()
+ORDER BY due_date;
 
 EXPLAIN
-SELECT *
+SELECT COUNT(*)
+FROM shipments
+WHERE user_id = 1 AND status = 'SHIPPED';
+
+EXPLAIN
+SELECT old_status, new_status, created_at
 FROM audit_logs
-WHERE user_id = 1
-  AND shipment_id = 1;
-
-
--- =========================================================
--- END OF DATABASE VALIDATION TESTS
--- =========================================================
+WHERE shipment_id = 1
+ORDER BY created_at;

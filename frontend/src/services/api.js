@@ -1,19 +1,32 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+const API_BASE_URL = "http://localhost:8000/api/v1";
+
+function getToken() {
+  return (
+    localStorage.getItem("influenceflow_token") ||
+    sessionStorage.getItem("influenceflow_token")
+  );
+}
 
 async function request(endpoint, options = {}) {
+  const token = getToken();
+
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
-    ...options,
   });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
 
     throw new Error(
-      errorData.message || `Request failed with status ${response.status}`
+      errorData.message ||
+        errorData.data?.message ||
+        `Request failed with status ${response.status}`,
     );
   }
 
