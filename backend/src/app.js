@@ -30,12 +30,6 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 app.use(express.static("public"));
 
-// Request logger
-// app.use((req, res, next) => {
-//     console.log("REQUEST:", req.method, req.originalUrl);
-//     next();
-// });
-
 // Health check
 app.use("/api/v1/health", healthRouter);
 
