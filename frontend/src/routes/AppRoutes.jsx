@@ -5,6 +5,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Brands from "../pages/Brands";
+import Products from "../pages/Products";
 
 import Sidebar from "../components/sidebar";
 import Topbar from "../components/topbar";
@@ -32,6 +33,7 @@ function AppRoutes() {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<DashboardLayout />} />
         <Route path="/brands" element={<Brands />} />
+        <Route path="/products" element={<Products />} />
       </Routes>
     </BrowserRouter>
   );
