@@ -6,6 +6,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Brands from "../pages/Brands";
+import Products from "../pages/Products";
 
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
@@ -36,6 +37,7 @@ function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardLayout />} />
           <Route path="/brands" element={<Brands />} />
+          <Route path="/products" element={<Products />} />
         </Route>
       </Routes>
     </BrowserRouter>
