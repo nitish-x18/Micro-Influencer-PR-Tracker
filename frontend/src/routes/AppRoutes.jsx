@@ -6,6 +6,8 @@ import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Brands from "../pages/Brands";
 import Products from "../pages/Products";
+import Shipments from "../pages/Shipments";
+import Deadlines from "../pages/Deadlines";
 
 import Sidebar from "../components/sidebar";
 import Topbar from "../components/topbar";
@@ -34,9 +36,10 @@ function AppRoutes() {
         <Route path="/dashboard" element={<DashboardLayout />} />
         <Route path="/brands" element={<Brands />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/shipments" element={<Shipments />} />
+        <Route path="/deadlines" element={<Deadlines />} />
       </Routes>
     </BrowserRouter>
   );
 }
-
 export default AppRoutes;
