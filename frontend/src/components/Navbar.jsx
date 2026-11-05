@@ -57,10 +57,13 @@ function Navbar() {
     localStorage.removeItem("influenceflow_session");
     sessionStorage.removeItem("influenceflow_session");
 
+    localStorage.removeItem("influenceflow_token");
+    sessionStorage.removeItem("influenceflow_token");
+
     setSession(null);
     closeMenu();
 
-    navigate("/");
+    navigate("/", { replace: true });
   };
 
   return (
