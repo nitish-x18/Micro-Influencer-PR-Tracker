@@ -23,8 +23,8 @@ export const getBrands = asyncHandler(async (req, res) => {
 
 export const getBrandById = asyncHandler(async (req, res) => {
     const brand = await brandService.getBrandById(
-        req.user.user_id,
-        req.params.brandId
+        req.params.brandId,
+        req.user.user_id
     );
 
     return res.status(200).json(
@@ -34,8 +34,8 @@ export const getBrandById = asyncHandler(async (req, res) => {
 
 export const updateBrand = asyncHandler(async (req, res) => {
     const brand = await brandService.updateBrand(
-        req.user.user_id,
         req.params.brandId,
+        req.user.user_id,
         req.body
     );
 
@@ -46,8 +46,8 @@ export const updateBrand = asyncHandler(async (req, res) => {
 
 export const deleteBrand = asyncHandler(async (req, res) => {
     await brandService.deleteBrand(
-        req.user.user_id,
-        req.params.brandId
+        req.params.brandId,
+        req.user.user_id
     );
 
     return res.status(200).json(
