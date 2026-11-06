@@ -9,8 +9,9 @@ import Products from "../pages/Products";
 import Shipments from "../pages/Shipments";
 import Deadlines from "../pages/Deadlines";
 
-import Sidebar from "../components/sidebar";
-import Topbar from "../components/topbar";
+import Sidebar from "../components/Sidebar";
+import Topbar from "../components/Topbar";
+import ProtectedRoute from "./ProtectedRoute";
 
 function DashboardLayout() {
   return (
@@ -33,13 +34,17 @@ function AppRoutes() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<DashboardLayout />} />
-        <Route path="/brands" element={<Brands />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/shipments" element={<Shipments />} />
-        <Route path="/deadlines" element={<Deadlines />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardLayout />} />
+          <Route path="/brands" element={<Brands />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/shipments" element={<Shipments />} />
+          <Route path="/deadlines" element={<Deadlines />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
 }
+
 export default AppRoutes;
