@@ -1,3 +1,4 @@
+
 const API_BASE_URL = "http://localhost:8000/api/v1";
 
 function getToken() {
@@ -20,24 +21,22 @@ async function request(endpoint, options = {}) {
     },
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+  const responseData = await response.json().catch(() => null);
 
+  if (!response.ok) {
     throw new Error(
-      errorData.message ||
-        errorData.data?.message ||
-        `Request failed with status ${response.status}`,
+      responseData?.message ||
+      responseData?.data?.message ||
+      `Request failed with status ${response.status}`
     );
   }
 
-  return response.json();
+  return responseData;
 }
 
 export const api = {
   get: (endpoint) =>
-    request(endpoint, {
-      method: "GET",
-    }),
+    request(endpoint, { method: "GET" }),
 
   post: (endpoint, data) =>
     request(endpoint, {
@@ -51,8 +50,12 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
-  delete: (endpoint) =>
+  patch: (endpoint, data) =>
     request(endpoint, {
-      method: "DELETE",
+      method: "PATCH",
+      body: JSON.stringify(data),
     }),
+
+  delete: (endpoint) =>
+    request(endpoint, { method: "DELETE" }),
 };

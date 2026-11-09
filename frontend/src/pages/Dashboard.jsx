@@ -37,7 +37,9 @@ function StatCard({ icon, title, value, subtitle, accent, iconBackground }) {
     <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white px-5 py-5">
       <div className={`absolute left-0 top-0 h-full w-1 ${accent}`} />
       <div className="flex items-center gap-3">
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${iconBackground}`}>
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${iconBackground}`}
+        >
           {icon}
         </div>
         <p className="text-sm font-semibold text-slate-500">{title}</p>
@@ -52,7 +54,7 @@ function StatCard({ icon, title, value, subtitle, accent, iconBackground }) {
 
 function DeadlineRow({ deadline, overdue = false }) {
   const date = formatDate(
-    deadline.due_date ?? deadline.deadline_date ?? deadline.deadline
+    deadline.due_date ?? deadline.deadline_date ?? deadline.deadline,
   );
 
   return (
@@ -68,7 +70,10 @@ function DeadlineRow({ deadline, overdue = false }) {
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-bold text-slate-900">
-          {deadline.title ?? deadline.content_title ?? deadline.task_name ?? "Untitled deadline"}
+          {deadline.title ??
+            deadline.content_title ??
+            deadline.task_name ??
+            "Untitled deadline"}
         </p>
         <p className="mt-1 text-xs text-slate-500">
           {deadline.brand_name ?? deadline.brand ?? "Brand"}
@@ -77,9 +82,11 @@ function DeadlineRow({ deadline, overdue = false }) {
         </p>
       </div>
 
-      <div className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ${
-        overdue ? "bg-red-50 text-red-600" : "bg-orange-50 text-orange-600"
-      }`}>
+      <div
+        className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ${
+          overdue ? "bg-red-50 text-red-600" : "bg-orange-50 text-orange-600"
+        }`}
+      >
         {overdue ? <AlertTriangle size={14} /> : <Clock3 size={14} />}
         <span>{overdue ? "Overdue" : "Upcoming"}</span>
       </div>
@@ -89,12 +96,16 @@ function DeadlineRow({ deadline, overdue = false }) {
 
 function Dashboard() {
   const [dashboard, setDashboard] = useState(null);
-  const [deadlineData, setDeadlineData] = useState({ upcoming: [], overdue: [] });
+  const [deadlineData, setDeadlineData] = useState({
+    upcoming: [],
+    overdue: [],
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadDashboard = useCallback(async () => {
-    setLoading(true);
+    setRefreshing(true);
     setError("");
 
     try {
@@ -108,12 +119,21 @@ function Dashboard() {
 
       setDashboard(data);
       setDeadlineData({
-        upcoming: Array.isArray(deadlines?.upcoming) ? deadlines.upcoming : [],
-        overdue: Array.isArray(deadlines?.overdue) ? deadlines.overdue : [],
+        upcoming: Array.isArray(deadlines?.upcomingDeadlines)
+          ? deadlines.upcomingDeadlines
+          : Array.isArray(deadlines?.upcoming)
+            ? deadlines.upcoming
+            : [],
+        overdue: Array.isArray(deadlines?.overdueDeadlines)
+          ? deadlines.overdueDeadlines
+          : Array.isArray(deadlines?.overdue)
+            ? deadlines.overdue
+            : [],
       });
     } catch (err) {
       setError(err.message || "Could not load dashboard data.");
     } finally {
+      setRefreshing(false);
       setLoading(false);
     }
   }, []);
@@ -131,7 +151,7 @@ function Dashboard() {
     );
   }
 
-  if (error) {
+  if (error && !dashboard) {
     return (
       <div className="m-5 rounded-xl border border-red-200 bg-white p-6">
         <h2 className="font-bold text-red-700">Dashboard could not load</h2>
@@ -150,16 +170,19 @@ function Dashboard() {
     );
   }
 
-  const summary = dashboard?.summary ?? {};
-  const upcoming = deadlineData.upcoming.length
-    ? deadlineData.upcoming
-    : dashboard?.upcomingDeadlinesList ?? [];
-  const overdue = deadlineData.overdue.length
-    ? deadlineData.overdue
-    : dashboard?.overdueDeadlinesList ?? [];
+  const summary = dashboard?.summary ?? dashboard ?? {};
+  const upcoming = Array.isArray(dashboard?.upcomingDeadlinesList)
+    ? dashboard.upcomingDeadlinesList
+    : deadlineData.upcoming;
 
-  const shipped = summary.shippedShipments ?? 0;
+  const overdue = Array.isArray(dashboard?.overdueDeadlinesList)
+    ? dashboard.overdueDeadlinesList
+    : deadlineData.overdue;
+
+  const shipped = summary.shippedShipments ?? summary.activeShipments ?? 0;
+
   const received = summary.receivedShipments ?? 0;
+
   const totalShipments = summary.totalShipments ?? 0;
 
   return (
@@ -176,9 +199,16 @@ function Dashboard() {
           onClick={loadDashboard}
           className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
         >
-          <RefreshCw size={15} /> Refresh
+          <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
+          {refreshing ? "Refreshing..." : "Refresh"}
         </button>
       </div>
+
+      {error && dashboard && (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          Refresh failed. Showing the last loaded data. {error}
+        </div>
+      )}
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -218,7 +248,9 @@ function Dashboard() {
       <section className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[1.45fr_1fr]">
         <div className="rounded-xl border border-slate-200 bg-white p-5">
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-lg font-extrabold text-slate-900">Upcoming deadlines</h2>
+            <h2 className="text-lg font-extrabold text-slate-900">
+              Upcoming deadlines
+            </h2>
             <Link
               to="/dashboard"
               className="flex items-center gap-2 text-sm font-bold text-cyan-600 hover:text-cyan-700"
@@ -227,18 +259,33 @@ function Dashboard() {
             </Link>
           </div>
           {upcoming.length ? (
-            upcoming.slice(0, 5).map((deadline, index) => (
-              <DeadlineRow key={deadline.id ?? deadline.deadline_id ?? index} deadline={deadline} />
-            ))
+            upcoming
+              .slice(0, 5)
+              .map((deadline, index) => (
+                <DeadlineRow
+                  key={deadline.id ?? deadline.deadline_id ?? index}
+                  deadline={deadline}
+                />
+              ))
           ) : (
-            <p className="py-8 text-center text-sm text-slate-500">No upcoming deadlines.</p>
+            <p className="py-8 text-center text-sm text-slate-500">
+              No upcoming deadlines.
+            </p>
           )}
 
-          <h2 className="mb-2 mt-6 text-lg font-extrabold text-slate-900">Overdue deadlines</h2>
+          <h2 className="mb-2 mt-6 text-lg font-extrabold text-slate-900">
+            Overdue deadlines
+          </h2>
           {overdue.length ? (
-            overdue.slice(0, 5).map((deadline, index) => (
-              <DeadlineRow key={deadline.id ?? deadline.deadline_id ?? index} deadline={deadline} overdue />
-            ))
+            overdue
+              .slice(0, 5)
+              .map((deadline, index) => (
+                <DeadlineRow
+                  key={deadline.id ?? deadline.deadline_id ?? index}
+                  deadline={deadline}
+                  overdue
+                />
+              ))
           ) : (
             <p className="py-4 text-sm text-slate-500">No overdue deadlines.</p>
           )}
@@ -246,30 +293,40 @@ function Dashboard() {
 
         <div className="space-y-5">
           <div className="rounded-xl border border-slate-200 bg-white p-5">
-            <h2 className="text-lg font-extrabold text-slate-900">Shipment status</h2>
+            <h2 className="text-lg font-extrabold text-slate-900">
+              Shipment status
+            </h2>
             <div className="mt-5 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <Truck size={16} /> Shipped
                 </span>
-                <span className="font-bold text-slate-900">{formatNumber(shipped)}</span>
+                <span className="font-bold text-slate-900">
+                  {formatNumber(shipped)}
+                </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                 <div
                   className="h-full rounded-full bg-slate-800"
-                  style={{ width: `${totalShipments ? (shipped / totalShipments) * 100 : 0}%` }}
+                  style={{
+                    width: `${totalShipments ? (shipped / totalShipments) * 100 : 0}%`,
+                  }}
                 />
               </div>
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
                   <Check size={16} /> Received
                 </span>
-                <span className="font-bold text-slate-900">{formatNumber(received)}</span>
+                <span className="font-bold text-slate-900">
+                  {formatNumber(received)}
+                </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                 <div
                   className="h-full rounded-full bg-emerald-600"
-                  style={{ width: `${totalShipments ? (received / totalShipments) * 100 : 0}%` }}
+                  style={{
+                    width: `${totalShipments ? (received / totalShipments) * 100 : 0}%`,
+                  }}
                 />
               </div>
             </div>
@@ -283,9 +340,14 @@ function Dashboard() {
                 ["Products tracked", summary.totalProducts],
                 ["Total deadlines", summary.totalDeadlines],
               ].map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between gap-3">
+                <div
+                  key={label}
+                  className="flex items-center justify-between gap-3"
+                >
                   <span className="text-sm text-slate-600">{label}</span>
-                  <span className="font-bold text-slate-900">{formatNumber(value)}</span>
+                  <span className="font-bold text-slate-900">
+                    {formatNumber(value)}
+                  </span>
                 </div>
               ))}
             </div>
@@ -296,23 +358,34 @@ function Dashboard() {
               <Package size={17} />
               <span>Recent shipments</span>
             </div>
-            {Array.isArray(dashboard?.recentShipments) && dashboard.recentShipments.length ? (
+            {Array.isArray(dashboard?.recentShipments) &&
+            dashboard.recentShipments.length ? (
               <div className="mt-3 divide-y divide-slate-100">
-                {dashboard.recentShipments.slice(0, 5).map((shipment, index) => (
-                  <div key={shipment.id ?? shipment.shipment_id ?? index} className="py-3">
-                    <p className="text-sm font-bold text-slate-900">
-                      {shipment.product_name ?? shipment.productName ?? shipment.name ?? "Shipment"}
-                    </p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      {shipment.brand_name ?? shipment.brand ?? "Brand"}
-                      {" · "}
-                      {shipment.status ?? "Status unavailable"}
-                    </p>
-                  </div>
-                ))}
+                {dashboard.recentShipments
+                  .slice(0, 5)
+                  .map((shipment, index) => (
+                    <div
+                      key={shipment.id ?? shipment.shipment_id ?? index}
+                      className="py-3"
+                    >
+                      <p className="text-sm font-bold text-slate-900">
+                        {shipment.product_name ??
+                          shipment.productName ??
+                          shipment.name ??
+                          "Shipment"}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {shipment.brand_name ?? shipment.brand ?? "Brand"}
+                        {" · "}
+                        {shipment.status ?? "Status unavailable"}
+                      </p>
+                    </div>
+                  ))}
               </div>
             ) : (
-              <p className="mt-3 text-sm text-slate-500">No shipments available yet.</p>
+              <p className="mt-3 text-sm text-slate-500">
+                No shipments available yet.
+              </p>
             )}
           </div>
         </div>

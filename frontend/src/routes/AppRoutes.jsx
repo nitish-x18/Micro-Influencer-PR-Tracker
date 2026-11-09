@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Landing from "../pages/Landing";
@@ -7,8 +8,9 @@ import Dashboard from "../pages/Dashboard";
 import Brands from "../pages/Brands";
 import Products from "../pages/Products";
 
-import Sidebar from "../components/sidebar";
-import Topbar from "../components/topbar";
+import Sidebar from "../components/Sidebar";
+import Topbar from "../components/Topbar";
+import ProtectedRoute from "./ProtectedRoute";
 
 function DashboardLayout() {
   return (
@@ -31,9 +33,12 @@ function AppRoutes() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<DashboardLayout />} />
-        <Route path="/brands" element={<Brands />} />
-        <Route path="/products" element={<Products />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardLayout />} />
+          <Route path="/brands" element={<Brands />} />
+          <Route path="/products" element={<Products />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
