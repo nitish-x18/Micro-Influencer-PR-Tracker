@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Landing from "../pages/Landing";
@@ -7,6 +6,8 @@ import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Brands from "../pages/Brands";
 import Products from "../pages/Products";
+import Shipments from "../pages/Shipments";
+import Deadlines from "../pages/Deadlines";
 
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
@@ -38,6 +39,8 @@ function AppRoutes() {
           <Route path="/dashboard" element={<DashboardLayout />} />
           <Route path="/brands" element={<Brands />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/shipments" element={<Shipments />} />
+          <Route path="/deadlines" element={<Deadlines />} />
         </Route>
       </Routes>
     </BrowserRouter>
