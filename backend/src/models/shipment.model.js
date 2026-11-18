@@ -1,12 +1,19 @@
+
 import { getDB } from "../config/databaseConfig.js";
+
+const SHIPMENT_SELECT = `
+    SELECT
+        shipments.*,
+        shipped_at AS shipment_date,
+        tracking_number AS tracking_reference
+    FROM shipments
+`;
 
 // Get all shipments
 export async function getAllShipments() {
     const db = getDB();
 
-    const [shipments] = await db.query(
-        "SELECT * FROM shipments"
-    );
+    const [shipments] = await db.query(SHIPMENT_SELECT);
 
     return shipments;
 }
@@ -16,7 +23,7 @@ export async function getShipmentsByUserId(userId) {
     const db = getDB();
 
     const [shipments] = await db.query(
-        "SELECT * FROM shipments WHERE user_id = ?",
+        `${SHIPMENT_SELECT} WHERE user_id = ?`,
         [userId]
     );
 
@@ -28,7 +35,7 @@ export async function getShipmentById(shipmentId) {
     const db = getDB();
 
     const [shipments] = await db.query(
-        "SELECT * FROM shipments WHERE shipment_id = ?",
+        `${SHIPMENT_SELECT} WHERE shipment_id = ?`,
         [shipmentId]
     );
 
@@ -40,7 +47,7 @@ export async function getShipmentsByBrandId(brandId) {
     const db = getDB();
 
     const [shipments] = await db.query(
-        "SELECT * FROM shipments WHERE brand_id = ?",
+        `${SHIPMENT_SELECT} WHERE brand_id = ?`,
         [brandId]
     );
 
@@ -52,7 +59,7 @@ export async function getShipmentsByProductId(productId) {
     const db = getDB();
 
     const [shipments] = await db.query(
-        "SELECT * FROM shipments WHERE product_id = ?",
+        `${SHIPMENT_SELECT} WHERE product_id = ?`,
         [productId]
     );
 
@@ -77,9 +84,9 @@ export async function createShipment(
             shipment_code,
             brand_id,
             product_id,
-            shipment_date,
+            shipped_at,
             status,
-            tracking_reference
+            tracking_number
         )
         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
@@ -96,7 +103,7 @@ export async function createShipment(
     return result;
 }
 
-// Update shipment status and record the change in audit_logs
+// Update shipment status and record the change in audit logs
 export async function updateShipmentStatus(
     shipmentId,
     status,
@@ -109,7 +116,6 @@ export async function updateShipmentStatus(
     try {
         await connection.beginTransaction();
 
-        // Get current shipment information
         const [shipments] = await connection.query(
             `SELECT user_id, status
              FROM shipments
@@ -125,17 +131,15 @@ export async function updateShipmentStatus(
         const shipment = shipments[0];
         const oldStatus = shipment.status;
 
-        // Update shipment
         await connection.query(
             `UPDATE shipments
              SET status = ?,
-                 tracking_reference = ?,
+                 tracking_number = ?,
                  received_at = ?
              WHERE shipment_id = ?`,
             [status, trackingReference, receivedAt, shipmentId]
         );
 
-        // Record the status change
         if (oldStatus !== status) {
             await connection.query(
                 `INSERT INTO audit_logs (
