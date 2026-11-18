@@ -1,3 +1,4 @@
+
 import { SHIPMENT_STATUS_VALUES } from "../constants/shipment.constants.js";
 
 const isPositiveId = (value) => {
@@ -13,14 +14,32 @@ const isPositiveId = (value) => {
     return /^\d+$/.test(id) && BigInt(id) > 0n;
 };
 
+const isValidDate = (value) => {
+    if (
+        typeof value !== "string" ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(value)
+    ) {
+        return false;
+    }
+
+    const date = new Date(`${value}T00:00:00Z`);
+
+    return (
+        !Number.isNaN(date.getTime()) &&
+        date.toISOString().slice(0, 10) === value
+    );
+};
+
 export const createShipmentValidator = (body = {}) => {
     const errors = [];
+
     const allowedFields = [
-        "product_id",
         "shipment_code",
-        "tracking_number",
+        "brand_id",
+        "product_id",
+        "shipment_date",
         "status",
-        "shipped_at"
+        "tracking_reference"
     ];
 
     const unknownFields = Object.keys(body).filter(
@@ -29,10 +48,6 @@ export const createShipmentValidator = (body = {}) => {
 
     if (unknownFields.length > 0) {
         errors.push(`Unsupported fields: ${unknownFields.join(", ")}`);
-    }
-
-    if (!isPositiveId(body.product_id)) {
-        errors.push("A valid product ID is required");
     }
 
     if (
@@ -44,12 +59,18 @@ export const createShipmentValidator = (body = {}) => {
         errors.push("Shipment code is too long");
     }
 
-    if (
-        body.tracking_number !== undefined &&
-        body.tracking_number !== null &&
-        typeof body.tracking_number !== "string"
-    ) {
-        errors.push("Tracking number must be a string");
+    if (!isPositiveId(body.brand_id)) {
+        errors.push("A valid brand ID is required");
+    }
+
+    if (!isPositiveId(body.product_id)) {
+        errors.push("A valid product ID is required");
+    }
+
+    if (!isValidDate(body.shipment_date)) {
+        errors.push(
+            "Shipment date must be a valid date in YYYY-MM-DD format"
+        );
     }
 
     if (
@@ -59,15 +80,12 @@ export const createShipmentValidator = (body = {}) => {
         errors.push("Invalid shipment status");
     }
 
-    if (body.shipped_at !== undefined && body.shipped_at !== null) {
-        if (
-            typeof body.shipped_at !== "string" ||
-            !/^\d{4}-\d{2}-\d{2}$/.test(body.shipped_at) ||
-            Number.isNaN(Date.parse(`${body.shipped_at}T00:00:00Z`)) ||
-            new Date(`${body.shipped_at}T00:00:00Z`).toISOString().slice(0, 10) !== body.shipped_at
-        ) {
-            errors.push("Shipped date must be a valid date in YYYY-MM-DD format");
-        }
+    if (
+        body.tracking_reference !== undefined &&
+        body.tracking_reference !== null &&
+        typeof body.tracking_reference !== "string"
+    ) {
+        errors.push("Tracking reference must be a string");
     }
 
     return errors;
@@ -75,7 +93,8 @@ export const createShipmentValidator = (body = {}) => {
 
 export const updateShipmentStatusValidator = (body = {}) => {
     const errors = [];
-    const allowedFields = ["status"];
+
+    const allowedFields = ["status", "tracking_reference"];
 
     const unknownFields = Object.keys(body).filter(
         (key) => !allowedFields.includes(key)
@@ -87,6 +106,14 @@ export const updateShipmentStatusValidator = (body = {}) => {
 
     if (!SHIPMENT_STATUS_VALUES.includes(body.status)) {
         errors.push("Status must be SHIPPED or RECEIVED");
+    }
+
+    if (
+        body.tracking_reference !== undefined &&
+        body.tracking_reference !== null &&
+        typeof body.tracking_reference !== "string"
+    ) {
+        errors.push("Tracking reference must be a string");
     }
 
     return errors;
