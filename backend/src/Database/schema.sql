@@ -1,3 +1,4 @@
+
 -- =========================================================
 -- MICRO-INFLUENCER PR PACKAGE TRACKER
 -- UPDATED DATABASE SCHEMA
@@ -83,12 +84,12 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE TABLE IF NOT EXISTS shipments (
     shipment_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
-    shipment_code VARCHAR(50) NOT NULL UNIQUE,
-    brand_id INT NOT NULL,
+    shipment_code VARCHAR(50) NOT NULL,
     product_id INT NOT NULL UNIQUE,
-    shipment_date DATE NOT NULL,
-    status ENUM('SHIPPED', 'RECEIVED') NOT NULL,
-    tracking_reference VARCHAR(255) NULL,
+    shipped_at DATE NOT NULL,
+    status ENUM('SHIPPED', 'RECEIVED')
+        NOT NULL DEFAULT 'SHIPPED',
+    tracking_number VARCHAR(255) NULL,
     received_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -98,17 +99,13 @@ CREATE TABLE IF NOT EXISTS shipments (
         ON DELETE CASCADE
         ON UPDATE CASCADE,
 
-    CONSTRAINT fk_shipments_brand
-        FOREIGN KEY (brand_id)
-        REFERENCES brands(brand_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
     CONSTRAINT fk_shipments_product
         FOREIGN KEY (product_id)
         REFERENCES products(product_id)
         ON DELETE CASCADE
-        ON UPDATE CASCADE
+        ON UPDATE CASCADE,
+
+    UNIQUE KEY uk_shipments_user_code (user_id, shipment_code)
 );
 
 
@@ -136,7 +133,7 @@ CREATE TABLE IF NOT EXISTS content_deadlines (
         'UPCOMING',
         'OVERDUE',
         'COMPLETED'
-    ) NOT NULL,
+    ) NULL,
 
     notes VARCHAR(500) NULL,
     completed_at TIMESTAMP NULL,
@@ -186,29 +183,26 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 -- 7. ADDITIONAL INDEXES
 -- =========================================================
 
-CREATE INDEX idx_brands_user_id
-    ON brands(user_id);
+-- Products
+CREATE INDEX idx_products_user_brand
+    ON products(user_id, brand_id);
 
-CREATE INDEX idx_products_brand_id
-    ON products(brand_id);
 
-CREATE INDEX idx_products_user_id
-    ON products(user_id);
+-- Shipments
+CREATE INDEX idx_shipments_user_status
+    ON shipments(user_id, status);
 
-CREATE INDEX idx_shipments_brand_id
-    ON shipments(brand_id);
 
-CREATE INDEX idx_shipments_user_id
-    ON shipments(user_id);
+-- Content deadlines
+CREATE INDEX idx_deadlines_user_done_due
+    ON content_deadlines(user_id, completed_at, due_date);
 
-CREATE INDEX idx_content_deadlines_shipment_id
-    ON content_deadlines(shipment_id);
 
-CREATE INDEX idx_content_deadlines_user_id
-    ON content_deadlines(user_id);
+-- Audit logs
+CREATE INDEX idx_audit_shipment_created
+    ON audit_logs(shipment_id, created_at);
 
-CREATE INDEX idx_audit_logs_user_id
-    ON audit_logs(user_id);
 
-CREATE INDEX idx_audit_logs_shipment_id
-    ON audit_logs(shipment_id);
+-- =========================================================
+-- END OF SCHEMA
+-- =========================================================
