@@ -109,7 +109,7 @@ export async function createShipment(
     return result;
 }
 
-// Update shipment status and record the change in audit logs
+// Update shipment status and record changes in audit logs
 export async function updateShipmentStatus(
     shipmentId,
     status,

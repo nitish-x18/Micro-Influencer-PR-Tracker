@@ -1,78 +1,36 @@
 import { Router } from "express";
-
 import {
-    getAllShipmentsController,
-    getShipmentByIdController,
-    getShipmentsByBrandIdController,
-    getShipmentsByProductIdController,
-    createShipmentController,
-    updateShipmentStatusController,
-    deleteShipmentController
+    createShipment,
+    getShipments,
+    getShipmentById,
+    updateShipmentStatus,
+    deleteShipment
 } from "../controllers/shipment.controller.js";
 
-import { authenticateUser } from "../middlewares/auth.middleware.js";
-import { verifyBrandOwnership } from "../middlewares/brand.middleware.js";
+import { authenticateUser } from "../middlewares/authenticateUser.js";
+import { validateRequest } from "../middlewares/validateRequest.js";
 
+import {
+    createShipmentValidator,
+    updateShipmentStatusValidator
+} from "../validators/shipment.validator.js";
 
 const router = Router();
 
+router.use(authenticateUser);
 
-// GET ALL SHIPMENTS
-router.get(
-    "/",
-    authenticateUser,
-    getAllShipmentsController
-);
+router.route("/")
+    .post(validateRequest(createShipmentValidator), createShipment)
+    .get(getShipments);
 
-
-// GET SHIPMENTS BY BRAND
-router.get(
-    "/brand/:brandId",
-    authenticateUser,
-    verifyBrandOwnership,
-    getShipmentsByBrandIdController
-);
-
-
-// GET SHIPMENTS BY PRODUCT
-router.get(
-    "/product/:productId",
-    authenticateUser,
-    getShipmentsByProductIdController
-);
-
-
-// CREATE SHIPMENT FOR A BRAND
-router.post(
-    "/brand/:brandId",
-    authenticateUser,
-    verifyBrandOwnership,
-    createShipmentController
-);
-
-
-// GET SHIPMENT BY ID
-router.get(
-    "/:shipmentId",
-    authenticateUser,
-    getShipmentByIdController
-);
-
-
-// UPDATE SHIPMENT
 router.patch(
-    "/:shipmentId",
-    authenticateUser,
-    updateShipmentStatusController
+    "/:shipmentId/status",
+    validateRequest(updateShipmentStatusValidator),
+    updateShipmentStatus
 );
 
-
-// DELETE SHIPMENT
-router.delete(
-    "/:shipmentId",
-    authenticateUser,
-    deleteShipmentController
-);
-
+router.route("/:shipmentId")
+    .get(getShipmentById)
+    .delete(deleteShipment);
 
 export default router;

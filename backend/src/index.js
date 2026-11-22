@@ -1,17 +1,26 @@
-import dotenv from "dotenv";
+import "dotenv/config";
+
 import { app } from "./app.js";
 import { connectDB } from "./config/databaseConfig.js";
 
-dotenv.config();
+const PORT = Number(process.env.PORT) || 8000;
 
-const PORT = process.env.PORT || 8000;
+const startServer = async () => {
+    try {
+        await connectDB();
 
-connectDB()
-    .then(() => {
-        app.listen(PORT, () => {
+        const server = app.listen(PORT, () => {
             console.log(`Server running on http://localhost:${PORT}`);
         });
-    })
-    .catch((error) => {
+
+        server.on("error", (error) => {
+            console.error("HTTP server failed:", error.message);
+            process.exitCode = 1;
+        });
+    } catch (error) {
         console.error("Server failed to start:", error.message);
-    });
+        process.exitCode = 1;
+    }
+};
+
+startServer();

@@ -1,4 +1,4 @@
-import { db } from "../config/databaseConfig.js";
+import { getDB } from "../config/databaseConfig.js";
 
 // Get all content deadlines
 export async function getAllContentDeadlines() {
