@@ -17,6 +17,20 @@ export async function getAllShipments() {
     return shipments;
 }
 
+// Get shipments by user ID
+export async function getShipmentsByUserId(userId) {
+    const db = getDB();
+
+    const [shipments] = await db.query(
+        `${SHIPMENT_SELECT}
+         WHERE user_id = ?
+         ORDER BY created_at DESC`,
+        [userId]
+    );
+
+    return shipments;
+}
+
 // Get shipment by ID
 export async function getShipmentById(shipmentId) {
     const db = getDB();
@@ -58,22 +72,31 @@ export async function getShipmentsByProductId(productId) {
     return shipments;
 }
 
-// Create a shipment
+// Create a new shipment
 export async function createShipment(
+    userId,
     shipmentCode,
     brandId,
     productId,
     shipmentDate,
-    status,
-    trackingReference
+    status = "SHIPPED",
+    trackingReference = null
 ) {
     const db = getDB();
 
     const [result] = await db.query(
-        `INSERT INTO shipments
-        (shipment_code, brand_id, product_id, shipment_date, status, tracking_reference)
-        VALUES (?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO shipments (
+            user_id,
+            shipment_code,
+            brand_id,
+            product_id,
+            shipment_date,
+            status,
+            tracking_reference
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
+            userId,
             shipmentCode,
             brandId,
             productId,
@@ -86,30 +109,71 @@ export async function createShipment(
     return result;
 }
 
-// Update shipment status
+// Update shipment status and record the change in audit logs
 export async function updateShipmentStatus(
     shipmentId,
     status,
-    trackingReference,
-    receivedAt
+    trackingReference = null,
+    receivedAt = null
 ) {
     const db = getDB();
+    const connection = await db.getConnection();
 
-    const [result] = await db.query(
-        `UPDATE shipments
-         SET status = ?,
-             tracking_reference = ?,
-             received_at = ?
-         WHERE shipment_id = ?`,
-        [
-            status,
-            trackingReference,
-            receivedAt,
-            shipmentId
-        ]
-    );
+    try {
+        await connection.beginTransaction();
 
-    return result;
+        const [shipments] = await connection.query(
+            `SELECT user_id, status
+             FROM shipments
+             WHERE shipment_id = ?
+             FOR UPDATE`,
+            [shipmentId]
+        );
+
+        if (shipments.length === 0) {
+            throw new Error("Shipment not found");
+        }
+
+        const shipment = shipments[0];
+        const oldStatus = shipment.status;
+
+        await connection.query(
+            `UPDATE shipments
+             SET status = ?,
+                 tracking_reference = ?,
+                 received_at = ?
+             WHERE shipment_id = ?`,
+            [status, trackingReference, receivedAt, shipmentId]
+        );
+
+        if (oldStatus !== status) {
+            await connection.query(
+                `INSERT INTO audit_logs (
+                    user_id,
+                    shipment_id,
+                    old_status,
+                    new_status
+                )
+                VALUES (?, ?, ?, ?)`,
+                [shipment.user_id, shipmentId, oldStatus, status]
+            );
+        }
+
+        await connection.commit();
+
+        return {
+            affectedRows: 1,
+            oldStatus,
+            newStatus: status
+        };
+
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+
+    } finally {
+        connection.release();
+    }
 }
 
 // Delete a shipment
