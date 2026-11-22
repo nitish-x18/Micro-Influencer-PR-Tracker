@@ -1,7 +1,9 @@
+
 import * as shipmentService from "../services/shipment.service.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
+// Create Shipment
 export const createShipment = asyncHandler(async (req, res) => {
     const shipment = await shipmentService.createShipment(
         req.user.user_id,
@@ -13,10 +15,10 @@ export const createShipment = asyncHandler(async (req, res) => {
     );
 });
 
+// Get All Shipments
 export const getShipments = asyncHandler(async (req, res) => {
     const result = await shipmentService.getShipments(
-        req.user.user_id,
-        req.query
+        req.user.user_id
     );
 
     return res.status(200).json(
@@ -24,10 +26,11 @@ export const getShipments = asyncHandler(async (req, res) => {
     );
 });
 
+// Get Shipment By ID
 export const getShipmentById = asyncHandler(async (req, res) => {
     const shipment = await shipmentService.getShipmentById(
-        req.user.user_id,
-        req.params.shipmentId
+        req.params.shipmentId,
+        req.user.user_id
     );
 
     return res.status(200).json(
@@ -35,11 +38,12 @@ export const getShipmentById = asyncHandler(async (req, res) => {
     );
 });
 
+// Update Shipment Status
 export const updateShipmentStatus = asyncHandler(async (req, res) => {
     const shipment = await shipmentService.updateShipmentStatus(
-        req.user.user_id,
         req.params.shipmentId,
-        req.body.status
+        req.user.user_id,
+        req.body
     );
 
     return res.status(200).json(
@@ -47,10 +51,11 @@ export const updateShipmentStatus = asyncHandler(async (req, res) => {
     );
 });
 
+// Delete Shipment
 export const deleteShipment = asyncHandler(async (req, res) => {
     await shipmentService.deleteShipment(
-        req.user.user_id,
-        req.params.shipmentId
+        req.params.shipmentId,
+        req.user.user_id
     );
 
     return res.status(200).json(
