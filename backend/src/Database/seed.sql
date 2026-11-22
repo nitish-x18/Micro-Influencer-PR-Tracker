@@ -9,7 +9,10 @@ USE microinfluencer_db;
 -- =====================================================
 -- 1. USERS
 -- =====================================================
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 INSERT INTO users
 (full_name, email, password_hash)
 VALUES
@@ -20,7 +23,10 @@ VALUES
 -- =====================================================
 -- 2. BRANDS
 -- =====================================================
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 INSERT INTO brands
 (user_id, brand_name, description, website, logo_url)
 VALUES
@@ -36,7 +42,10 @@ VALUES
 -- =====================================================
 -- 3. PRODUCTS
 -- =====================================================
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 INSERT INTO products
 (brand_id, user_id, product_name, value, currency, description)
 VALUES
@@ -52,6 +61,7 @@ VALUES
 
 -- =====================================================
 -- 4. SHIPMENTS
+<<<<<<< Updated upstream
 -- brand_id is not stored in shipments.
 -- Brand is derived through products.brand_id.
 -- =====================================================
@@ -59,6 +69,15 @@ VALUES
 INSERT INTO shipments
 (shipment_code, product_id, user_id,
  shipped_at, status, tracking_number, received_at)
+=======
+-- =====================================================
+-- brand_id is not stored in shipments.
+-- Brand is derived through products.brand_id.
+
+INSERT INTO shipments
+(shipment_code, product_id, user_id,
+ shipped_date, status, tracking_reference, received_at)
+>>>>>>> Stashed changes
 VALUES
 ('SHIP-001', 1, 1, '2026-09-20',
  'RECEIVED', 'TRK123456', '2026-09-23 14:30:00'),
@@ -94,7 +113,10 @@ VALUES
 -- =====================================================
 -- 6. AUDIT LOGS
 -- =====================================================
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 INSERT INTO audit_logs
 (user_id, shipment_id, old_status, new_status)
 VALUES
