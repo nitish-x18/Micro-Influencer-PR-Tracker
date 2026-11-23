@@ -1,20 +1,13 @@
 
 import { api } from "./api";
 
-const getData = (response) => {
-  // Supports both Axios response and already-unwrapped response data.
-  const result = response?.data ?? response;
-
-  // Supports apiResponse format: { data, message, success }
-  return result?.data ?? result;
-};
-
 export const shipmentService = {
   async getAll() {
     const response = await api.get("/shipments");
-    const data = getData(response);
 
-    return Array.isArray(data) ? data : data?.shipments ?? [];
+    return Array.isArray(response?.data)
+      ? response.data
+      : response?.data?.shipments ?? [];
   },
 
   async create(shipmentData) {
@@ -29,7 +22,8 @@ export const shipmentService = {
     };
 
     const response = await api.post("/shipments", payload);
-    return getData(response);
+
+    return response?.data;
   },
 
   async updateStatus(shipmentId, status) {
@@ -38,17 +32,18 @@ export const shipmentService = {
       { status }
     );
 
-    return getData(response);
+    return response?.data;
   },
 
   async getById(shipmentId) {
     const response = await api.get(`/shipments/${shipmentId}`);
-    return getData(response);
+
+    return response?.data;
   },
 
   async delete(shipmentId) {
     const response = await api.delete(`/shipments/${shipmentId}`);
-    return getData(response);
+
+    return response?.data;
   },
 };
-

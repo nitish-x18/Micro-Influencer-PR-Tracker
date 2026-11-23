@@ -11,7 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import Sidebar from "../components/sidebar";
+import Sidebar from "../components/Sidebar";
 import { brandService } from "../services/brandService";
 import { productService } from "../services/productService";
 
@@ -257,10 +257,19 @@ export default function Products() {
       <Sidebar />
 
       <main className="min-w-0 flex-1">
+        {/* Page header - same as Shipments and Brands */}
         <header className="flex h-[72px] items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-7">
           <h1 className="text-xl font-extrabold">Products</h1>
 
           <div className="flex items-center gap-3 sm:gap-5">
+            <span className="rounded-full p-2 text-slate-600">
+              <Search size={20} />
+            </span>
+
+            <span className="rounded-full p-2 text-slate-600">
+              <Bell size={20} />
+            </span>
+
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-600 text-xs font-bold text-white">
               AM
             </div>
