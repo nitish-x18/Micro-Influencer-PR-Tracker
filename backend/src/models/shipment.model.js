@@ -1,8 +1,13 @@
 import { getDB } from "../config/databaseConfig.js";
 
+// Common shipment query with brand name
 const SHIPMENT_SELECT = `
-    SELECT shipments.*
-    FROM shipments
+    SELECT
+        s.*,
+        b.brand_name
+    FROM shipments s
+    LEFT JOIN brands b
+        ON s.brand_id = b.brand_id
 `;
 
 // Get all shipments
@@ -11,7 +16,7 @@ export async function getAllShipments() {
 
     const [shipments] = await db.query(
         `${SHIPMENT_SELECT}
-         ORDER BY created_at DESC`
+         ORDER BY s.created_at DESC`
     );
 
     return shipments;
@@ -23,8 +28,8 @@ export async function getShipmentsByUserId(userId) {
 
     const [shipments] = await db.query(
         `${SHIPMENT_SELECT}
-         WHERE user_id = ?
-         ORDER BY created_at DESC`,
+         WHERE s.user_id = ?
+         ORDER BY s.created_at DESC`,
         [userId]
     );
 
@@ -37,7 +42,7 @@ export async function getShipmentById(shipmentId) {
 
     const [shipments] = await db.query(
         `${SHIPMENT_SELECT}
-         WHERE shipment_id = ?`,
+         WHERE s.shipment_id = ?`,
         [shipmentId]
     );
 
@@ -50,8 +55,8 @@ export async function getShipmentsByBrandId(brandId) {
 
     const [shipments] = await db.query(
         `${SHIPMENT_SELECT}
-         WHERE brand_id = ?
-         ORDER BY created_at DESC`,
+         WHERE s.brand_id = ?
+         ORDER BY s.created_at DESC`,
         [brandId]
     );
 
@@ -64,8 +69,8 @@ export async function getShipmentsByProductId(productId) {
 
     const [shipments] = await db.query(
         `${SHIPMENT_SELECT}
-         WHERE product_id = ?
-         ORDER BY created_at DESC`,
+         WHERE s.product_id = ?
+         ORDER BY s.created_at DESC`,
         [productId]
     );
 
