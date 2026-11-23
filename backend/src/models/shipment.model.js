@@ -1,11 +1,7 @@
-
 import { getDB } from "../config/databaseConfig.js";
 
 const SHIPMENT_SELECT = `
-    SELECT
-        shipments.*,
-        shipped_at AS shipment_date,
-        tracking_number AS tracking_reference
+    SELECT shipments.*
     FROM shipments
 `;
 
@@ -13,7 +9,10 @@ const SHIPMENT_SELECT = `
 export async function getAllShipments() {
     const db = getDB();
 
-    const [shipments] = await db.query(SHIPMENT_SELECT);
+    const [shipments] = await db.query(
+        `${SHIPMENT_SELECT}
+         ORDER BY created_at DESC`
+    );
 
     return shipments;
 }
@@ -23,7 +22,9 @@ export async function getShipmentsByUserId(userId) {
     const db = getDB();
 
     const [shipments] = await db.query(
-        `${SHIPMENT_SELECT} WHERE user_id = ?`,
+        `${SHIPMENT_SELECT}
+         WHERE user_id = ?
+         ORDER BY created_at DESC`,
         [userId]
     );
 
@@ -35,7 +36,8 @@ export async function getShipmentById(shipmentId) {
     const db = getDB();
 
     const [shipments] = await db.query(
-        `${SHIPMENT_SELECT} WHERE shipment_id = ?`,
+        `${SHIPMENT_SELECT}
+         WHERE shipment_id = ?`,
         [shipmentId]
     );
 
@@ -47,7 +49,9 @@ export async function getShipmentsByBrandId(brandId) {
     const db = getDB();
 
     const [shipments] = await db.query(
-        `${SHIPMENT_SELECT} WHERE brand_id = ?`,
+        `${SHIPMENT_SELECT}
+         WHERE brand_id = ?
+         ORDER BY created_at DESC`,
         [brandId]
     );
 
@@ -59,7 +63,9 @@ export async function getShipmentsByProductId(productId) {
     const db = getDB();
 
     const [shipments] = await db.query(
-        `${SHIPMENT_SELECT} WHERE product_id = ?`,
+        `${SHIPMENT_SELECT}
+         WHERE product_id = ?
+         ORDER BY created_at DESC`,
         [productId]
     );
 
@@ -84,9 +90,9 @@ export async function createShipment(
             shipment_code,
             brand_id,
             product_id,
-            shipped_at,
+            shipment_date,
             status,
-            tracking_number
+            tracking_reference
         )
         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
@@ -103,7 +109,7 @@ export async function createShipment(
     return result;
 }
 
-// Update shipment status and record the change in audit logs
+// Update shipment status and record changes in audit logs
 export async function updateShipmentStatus(
     shipmentId,
     status,
@@ -134,7 +140,7 @@ export async function updateShipmentStatus(
         await connection.query(
             `UPDATE shipments
              SET status = ?,
-                 tracking_number = ?,
+                 tracking_reference = ?,
                  received_at = ?
              WHERE shipment_id = ?`,
             [status, trackingReference, receivedAt, shipmentId]
@@ -160,9 +166,11 @@ export async function updateShipmentStatus(
             oldStatus,
             newStatus: status
         };
+
     } catch (error) {
         await connection.rollback();
         throw error;
+
     } finally {
         connection.release();
     }
@@ -173,7 +181,8 @@ export async function deleteShipment(shipmentId) {
     const db = getDB();
 
     const [result] = await db.query(
-        "DELETE FROM shipments WHERE shipment_id = ?",
+        `DELETE FROM shipments
+         WHERE shipment_id = ?`,
         [shipmentId]
     );
 
