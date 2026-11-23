@@ -28,10 +28,16 @@ export async function getBrandsByUserId(userId) {
     const db = getDB();
 
     const [brands] = await db.query(
-        `SELECT *
-         FROM brands
-         WHERE user_id = ?
-         ORDER BY created_at DESC`,
+        `SELECT
+            b.*,
+            COUNT(p.product_id) AS product_count,
+            COALESCE(SUM(p.value), 0) AS total_value
+         FROM brands b
+         LEFT JOIN products p
+            ON b.brand_id = p.brand_id
+         WHERE b.user_id = ?
+         GROUP BY b.brand_id
+         ORDER BY b.created_at DESC`,
         [userId]
     );
 
