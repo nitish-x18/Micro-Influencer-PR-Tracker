@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Search,
+  Bell,
   Plus,
   Package,
   Truck,
@@ -28,7 +29,6 @@ const getBrandName = (brand) =>
 
 const getBrandWebsite = (brand) =>
   brand?.websiteUrl ?? brand?.website ?? "";
-
 
 const getProducts = (brand) =>
   Array.isArray(brand?.productList) ? brand.productList : [];
@@ -97,7 +97,6 @@ export default function Brands() {
         : result?.data ?? result?.brands ?? [];
 
       setBrands(records);
-
       setSelectedId(null);
     } catch (err) {
       setError(err?.message || "Unable to load brands.");
@@ -128,11 +127,11 @@ export default function Brands() {
   }, [brands, search, filter]);
 
   const selectedBrand =
-  selectedId == null
-    ? null
-    : filteredBrands.find(
-        (brand) => String(brand.id) === String(selectedId)
-      ) ?? null;
+    selectedId == null
+      ? null
+      : filteredBrands.find(
+          (brand) => String(brand.id) === String(selectedId)
+        ) ?? null;
 
   const selectedProducts = getProducts(selectedBrand);
 
@@ -151,7 +150,10 @@ export default function Brands() {
     setEditingBrand(brand);
 
     setForm({
-      name: getBrandName(brand) === "Unnamed brand" ? "" : getBrandName(brand),
+      name:
+        getBrandName(brand) === "Unnamed brand"
+          ? ""
+          : getBrandName(brand),
       websiteUrl: getBrandWebsite(brand),
       description: brand.description ?? "",
     });
@@ -241,101 +243,90 @@ export default function Brands() {
       <Sidebar />
 
       <div className="min-w-0 flex-1">
-        {/* Page header */}
-        <header className="flex h-[72px] items-center justify-between border-b border-[#e6e9ef] bg-white px-5 sm:px-6">
-          <div>
-            <h1 className="text-[22px] font-bold tracking-tight">
-              Brands
-            </h1>
+        {/* Page header - same as Shipments */}
+        <header className="flex h-[72px] items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-7">
+          <h1 className="text-xl font-extrabold">Brands</h1>
 
-            <p className="mt-1 text-xs text-slate-500">
-              Manage your brands, products and shipments
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4 text-sm text-slate-500">
-            <span className="hidden sm:inline">
-              PR Package Tracker
+          <div className="flex items-center gap-3 sm:gap-5">
+            <span className="rounded-full p-2 text-slate-600">
+              <Search size={20} />
             </span>
 
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-800">
+            <span className="rounded-full p-2 text-slate-600">
+              <Bell size={20} />
+            </span>
+
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-600 text-xs font-bold text-white">
               AM
-            </span>
+            </div>
           </div>
         </header>
 
         <main className="min-w-0 bg-[#f4f5f9] p-4 sm:p-5">
-          {/* Search and filters on the left; Add brand on the right */}
-          
+          {/* Search and filters */}
+          <section className="mb-4 grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+              <label className="flex h-10 min-w-0 w-full items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 sm:flex-1">
+                <Search size={17} className="shrink-0 text-slate-400" />
 
+                <input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search brands"
+                  aria-label="Search brands"
+                  className="w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-slate-400"
+                />
 
-<section className="mb-4 grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
-  {/* Search and filters */}
-  <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-    <label className="flex h-10 min-w-0 w-full items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 sm:flex-1">
-      <Search size={17} className="shrink-0 text-slate-400" />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    aria-label="Clear search"
+                    className="shrink-0"
+                  >
+                    <X size={15} className="text-slate-400" />
+                  </button>
+                )}
+              </label>
 
-      <input
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-        placeholder="Search brands"
-        aria-label="Search brands"
-        className="w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-slate-400"
-      />
+              <div className="flex min-w-0 flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFilter("all")}
+                  className={`h-10 rounded-full border px-3 text-xs font-semibold ${
+                    filter === "all"
+                      ? "border-[#0b293d] bg-[#0b293d] text-white"
+                      : "border-slate-200 bg-white text-slate-600"
+                  }`}
+                >
+                  All brands
+                </button>
 
-      {search && (
-        <button
-          type="button"
-          onClick={() => setSearch("")}
-          aria-label="Clear search"
-          className="shrink-0"
-        >
-          <X size={15} className="text-slate-400" />
-        </button>
-      )}
-    </label>
+                <button
+                  type="button"
+                  onClick={() => setFilter("open")}
+                  className={`h-10 rounded-full border px-3 text-xs ${
+                    filter === "open"
+                      ? "border-[#0b293d] bg-[#0b293d] text-white"
+                      : "border-slate-200 bg-white text-slate-600"
+                  }`}
+                >
+                  With open shipments
+                </button>
+              </div>
+            </div>
 
-    <div className="flex min-w-0 flex-wrap gap-2">
-      <button
-        type="button"
-        onClick={() => setFilter("all")}
-        className={`h-10 rounded-full border px-3 text-xs font-semibold ${
-          filter === "all"
-            ? "border-[#0b293d] bg-[#0b293d] text-white"
-            : "border-slate-200 bg-white text-slate-600"
-        }`}
-      >
-        All brands
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setFilter("open")}
-        className={`h-10 rounded-full border px-3 text-xs ${
-          filter === "open"
-            ? "border-[#0b293d] bg-[#0b293d] text-white"
-            : "border-slate-200 bg-white text-slate-600"
-        }`}
-      >
-        With open shipments
-      </button>
-    </div>
-  </div>
-
-  {/* Add brand */}
-  <div className="flex items-center justify-start xl:justify-end">
-    <button
-      type="button"
-      onClick={openAddForm}
-      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#f16b3b] px-5 text-sm font-semibold text-white hover:bg-[#df5a2c] sm:w-auto"
-    >
-      <Plus size={17} />
-      Add brand
-    </button>
-  </div>
-</section>
-
-
+            <div className="flex items-center justify-start xl:justify-end">
+              <button
+                type="button"
+                onClick={openAddForm}
+                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#f16b3b] px-5 text-sm font-semibold text-white hover:bg-[#df5a2c] sm:w-auto"
+              >
+                <Plus size={17} />
+                Add brand
+              </button>
+            </div>
+          </section>
 
           {error && (
             <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -351,26 +342,26 @@ export default function Brands() {
             </div>
           )}
 
-          {/* Brand list and details: aligned to the same height */}
+          {/* Brand list and details */}
           <section
-  className={`grid min-w-0 items-stretch gap-3 ${
-    selectedBrand
-      ? "grid-cols-1 xl:grid-cols-[minmax(0,1.12fr)_minmax(0,1fr)]"
-      : "grid-cols-1"
-  }`}
->
+            className={`grid min-w-0 items-stretch gap-3 ${
+              selectedBrand
+                ? "grid-cols-1 xl:grid-cols-[minmax(0,1.12fr)_minmax(0,1fr)]"
+                : "grid-cols-1"
+            }`}
+          >
             {/* Brand table */}
             <div className="min-w-0">
-             
-
               <div
-  className={`min-w-0 overflow-hidden rounded-xl border border-[#e1e5ec] bg-white ${
-    search.trim() || filter !== "all" ? "h-auto" : "h-[440px]"
-  }`}
->
+                className={`min-w-0 overflow-hidden rounded-xl border border-[#e1e5ec] bg-white ${
+                  search.trim() || filter !== "all"
+                    ? "h-auto"
+                    : "h-[440px]"
+                }`}
+              >
                 <div className="h-full overflow-auto">
                   <table className="w-full table-fixed border-collapse text-left text-xs">
-<thead className="sticky top-0 z-10 bg-[#0b293d] text-white">
+                    <thead className="sticky top-0 z-10 bg-[#0b293d] text-white">
                       <tr>
                         <th className="w-[43%] px-3 py-3 font-semibold">
                           Brand
@@ -425,51 +416,54 @@ export default function Brands() {
                           const shipments = getShipmentCount(brand);
                           const value = getBrandValue(brand);
 
-                          const isSelected =
-                            String(selectedBrand?.id) === String(id);
-
                           return (
                             <tr
                               key={id ?? name}
                               onClick={() => setSelectedId(id)}
-                              
-className="cursor-pointer border-b border-[#edf0f4] last:border-b-0 bg-white transition-colors duration-150 hover:bg-[#fff0e8]"
- 
-
+                              className="cursor-pointer border-b border-[#edf0f4] last:border-b-0 bg-white transition-colors duration-150 hover:bg-[#fff0e8]"
                             >
                               <td className="px-2 py-[7px] sm:px-3">
                                 <div className="flex min-w-0 items-center gap-2">
-                                 
-<span
-  className="flex h-[28px] w-[28px] shrink-0 items-center justify-center overflow-hidden rounded-[9px] text-sm font-bold text-white"
-  style={{
-    backgroundColor: brand.color || "#4c52f4",
-  }}
->
-  {brand.logoUrl || brand.logo || brand.logo_url ? (
-    <img
-      src={brand.logoUrl || brand.logo || brand.logo_url}
-      alt={`${name} logo`}
-      className="h-full w-full object-contain"
-      onError={(event) => {
-        event.currentTarget.style.display = "none";
-        event.currentTarget.nextElementSibling.style.display = "flex";
-      }}
-    />
-  ) : null}
-  <span
-    className="h-full w-full items-center justify-center"
-    style={{
-      display:
-        brand.logoUrl || brand.logo || brand.logo_url
-          ? "none"
-          : "flex",
-    }}
-  >
-    {name.charAt(0).toUpperCase()}
-  </span>
-</span>
+                                  <span
+                                    className="flex h-[28px] w-[28px] shrink-0 items-center justify-center overflow-hidden rounded-[9px] text-sm font-bold text-white"
+                                    style={{
+                                      backgroundColor: brand.color || "#4c52f4",
+                                    }}
+                                  >
+                                    {brand.logoUrl ||
+                                    brand.logo ||
+                                    brand.logo_url ? (
+                                      <img
+                                        src={
+                                          brand.logoUrl ||
+                                          brand.logo ||
+                                          brand.logo_url
+                                        }
+                                        alt={`${name} logo`}
+                                        className="h-full w-full object-contain"
+                                        onError={(event) => {
+                                          event.currentTarget.style.display =
+                                            "none";
+                                          event.currentTarget.nextElementSibling.style.display =
+                                            "flex";
+                                        }}
+                                      />
+                                    ) : null}
 
+                                    <span
+                                      className="h-full w-full items-center justify-center"
+                                      style={{
+                                        display:
+                                          brand.logoUrl ||
+                                          brand.logo ||
+                                          brand.logo_url
+                                            ? "none"
+                                            : "flex",
+                                      }}
+                                    >
+                                      {name.charAt(0).toUpperCase()}
+                                    </span>
+                                  </span>
 
                                   <span className="truncate font-semibold text-[#172c3e]">
                                     {name}
@@ -514,210 +508,187 @@ className="cursor-pointer border-b border-[#edf0f4] last:border-b-0 bg-white tra
             </div>
 
             {/* Selected brand details */}
-            {/* Selected brand details */}
-{selectedBrand && (
-  <div className="flex min-w-0 flex-col">
-              
+            {selectedBrand && (
+              <div className="flex min-w-0 flex-col">
+                <div className="flex min-h-[360px] max-h-[560px] min-w-0 flex-col overflow-hidden rounded-xl border border-[#e1e5ec] bg-white p-4 shadow-sm sm:h-[440px] sm:max-h-none sm:p-5">
+                  {loading ? (
+                    <div className="flex min-h-[300px] items-center justify-center text-sm text-slate-500">
+                      <LoaderCircle
+                        size={17}
+                        className="mr-2 animate-spin"
+                      />
+                      Loading brand details...
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div
+                            className="flex h-[46px] w-[46px] shrink-0 items-center justify-center overflow-hidden rounded-xl text-lg font-bold text-white"
+                            style={{
+                              backgroundColor:
+                                selectedBrand.color || "#4c52f4",
+                            }}
+                          >
+                            {selectedBrand.logoUrl ||
+                            selectedBrand.logo ||
+                            selectedBrand.logo_url ? (
+                              <img
+                                src={
+                                  selectedBrand.logoUrl ||
+                                  selectedBrand.logo ||
+                                  selectedBrand.logo_url
+                                }
+                                alt={`${getBrandName(selectedBrand)} logo`}
+                                className="h-full w-full object-contain"
+                                onError={(event) => {
+                                  event.currentTarget.style.display = "none";
+                                  event.currentTarget.nextElementSibling.style.display =
+                                    "flex";
+                                }}
+                              />
+                            ) : null}
 
-              <div className="flex min-h-[360px] max-h-[560px] min-w-0 flex-col overflow-hidden rounded-xl border border-[#e1e5ec] bg-white p-4 sm:h-[440px] sm:max-h-none sm:p-5">
-                {loading ? (
-                  <div className="flex min-h-[300px] items-center justify-center text-sm text-slate-500">
-                    <LoaderCircle
-                      size={17}
-                      className="mr-2 animate-spin"
-                    />
-                    Loading brand details...
-                  </div>
-                ) : !selectedBrand ? (
-                  <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
-                    <Package
-                      size={30}
-                      className="mb-3 text-slate-300"
-                    />
+                            <span
+                              className="h-full w-full items-center justify-center"
+                              style={{
+                                display:
+                                  selectedBrand.logoUrl ||
+                                  selectedBrand.logo ||
+                                  selectedBrand.logo_url
+                                    ? "none"
+                                    : "flex",
+                              }}
+                            >
+                              {getBrandName(selectedBrand)
+                                .charAt(0)
+                                .toUpperCase()}
+                            </span>
+                          </div>
 
-                    <p className="font-semibold text-slate-700">
-                      Select a brand to view details
-                    </p>
+                          <div className="min-w-0">
+                            <h3 className="truncate text-base font-bold text-[#102a3b]">
+                              {getBrandName(selectedBrand)}
+                            </h3>
 
-                    <p className="mt-1 text-xs text-slate-500">
-                      Choose a brand from the table or add a new one.
-                    </p>
-                  </div>
-                ) : (
-                  <>
-          
+                            <p className="mt-1 truncate text-xs text-slate-500">
+                              {getBrandWebsite(selectedBrand) ||
+                                "No website provided"}
+                            </p>
+                          </div>
+                        </div>
 
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex min-w-0 items-center gap-3">
-                        
-<div
-  className="flex h-[46px] w-[46px] shrink-0 items-center justify-center overflow-hidden rounded-xl text-lg font-bold text-white"
-  style={{
-    backgroundColor: selectedBrand.color || "#4c52f4",
-  }}
->
-  {selectedBrand.logoUrl ||
-  selectedBrand.logo ||
-  selectedBrand.logo_url ? (
-    <img
-      src={
-        selectedBrand.logoUrl ||
-        selectedBrand.logo ||
-        selectedBrand.logo_url
-      }
-      alt={`${getBrandName(selectedBrand)} logo`}
-      className="h-full w-full object-contain"
-      onError={(event) => {
-        event.currentTarget.style.display = "none";
-        event.currentTarget.nextElementSibling.style.display = "flex";
-      }}
-    />
-  ) : null}
-  <span
-    className="h-full w-full items-center justify-center"
-    style={{
-      display:
-        selectedBrand.logoUrl ||
-        selectedBrand.logo ||
-        selectedBrand.logo_url
-          ? "none"
-          : "flex",
-    }}
-  >
-    {getBrandName(selectedBrand).charAt(0).toUpperCase()}
-  </span>
-</div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedId(null)}
+                          title="Close details"
+                          aria-label="Close brand details"
+                          className="shrink-0 rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
 
+                      {selectedBrand.description && (
+                        <p className="mt-5 text-xs leading-5 text-slate-600">
+                          {selectedBrand.description}
+                        </p>
+                      )}
 
-                        <div className="min-w-0">
-                          <h3 className="truncate text-base font-bold text-[#102a3b]">
-                            {getBrandName(selectedBrand)}
-                          </h3>
+                      <div className="mt-5 grid grid-cols-2 gap-3">
+                        <div className="rounded-lg border border-[#edf0f4] bg-[#f7f8fa] p-3">
+                          <p className="text-[11px] text-slate-500">
+                            Products
+                          </p>
 
-                          <p className="mt-1 truncate text-xs text-slate-500">
-                            {getBrandWebsite(selectedBrand) ||
-                              "No website provided"}
+                          <p className="mt-1 text-xl font-bold text-[#102a3b]">
+                            {getProductCount(selectedBrand)}
+                          </p>
+                        </div>
+
+                        <div className="rounded-lg border-l-[3px] border-l-[#f28a35] bg-[#fff8f1] p-3">
+                          <p className="text-[11px] text-slate-500">
+                            In transit
+                          </p>
+
+                          <p className="mt-1 text-xl font-bold text-[#102a3b]">
+                            {getShipmentCount(selectedBrand)}
                           </p>
                         </div>
                       </div>
 
-                      
-<button
-  type="button"
-  onClick={() => setSelectedId(null)}
-  title="Close details"
-  aria-label="Close brand details"
-  className="shrink-0 rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
->
-  <X size={18} />
-</button>
-
-                    </div>
-
-                    {selectedBrand.description && (
-                      <p className="mt-5 text-xs leading-5 text-slate-600">
-                        {selectedBrand.description}
-                      </p>
-                    )}
-
-                    <div className="mt-5 grid grid-cols-2 gap-3">
-                      <div className="rounded-lg border border-[#edf0f4] bg-[#f7f8fa] p-3">
-                        <p className="text-[11px] text-slate-500">
+                      <div className="mt-5 flex min-h-0 flex-1 flex-col">
+                        <h4 className="mb-3 text-xs font-bold text-[#102a3b]">
                           Products
-                        </p>
+                        </h4>
 
-                        <p className="mt-1 text-xl font-bold text-[#102a3b]">
-                          {getProductCount(selectedBrand)}
-                        </p>
-                      </div>
+                        {selectedProducts.length > 0 ? (
+                          <div className="min-h-0 flex-1 overflow-y-auto">
+                            {selectedProducts.map((product, index) => (
+                              <div
+                                key={
+                                  product.id ??
+                                  product.productId ??
+                                  index
+                                }
+                                className="flex items-center justify-between gap-3 border-b border-[#edf0f4] py-2.5 last:border-b-0"
+                              >
+                                <div className="flex min-w-0 items-center gap-2">
+                                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[#edf2ff] text-[#5870ba]">
+                                    <Package size={13} />
+                                  </span>
 
-                      <div className="rounded-lg border-l-[3px] border-l-[#f28a35] bg-[#fff8f1] p-3">
-                        <p className="text-[11px] text-slate-500">
-                          In transit
-                        </p>
+                                  <span className="truncate text-xs text-slate-700">
+                                    {product.name ??
+                                      product.productName ??
+                                      "Unnamed product"}
+                                  </span>
+                                </div>
 
-                        <p className="mt-1 text-xl font-bold text-[#102a3b]">
-                          {getShipmentCount(selectedBrand)}
-                        </p>
-                      </div>
-                    </div>
-
-                    
-<div className="mt-5 flex min-h-0 flex-1 flex-col">
-
-  <h4 className="mb-3 text-xs font-bold text-[#102a3b]">
-    Products
-  </h4>
-
-                      {selectedProducts.length > 0 ? (
-                       
-<div className="min-h-0 flex-1 overflow-y-auto">
-
-  {selectedProducts.map((product, index) => (
-                            <div
-                              key={
-                                product.id ??
-                                product.productId ??
-                                index
-                              }
-                              className="flex items-center justify-between gap-3 border-b border-[#edf0f4] py-2.5 last:border-b-0"
-                            >
-                              <div className="flex min-w-0 items-center gap-2">
-                                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[#edf2ff] text-[#5870ba]">
-                                  <Package size={13} />
-                                </span>
-
-                                <span className="truncate text-xs text-slate-700">
-                                  {product.name ??
-                                    product.productName ??
-                                    "Unnamed product"}
+                                <span className="shrink-0 text-xs font-medium text-slate-700">
+                                  {formatCurrency(
+                                    product.price ?? product.value ?? 0
+                                  )}
                                 </span>
                               </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="py-3 text-xs text-slate-500">
+                            No product details available for this brand.
+                          </p>
+                        )}
+                      </div>
 
-                              <span className="shrink-0 text-xs font-medium text-slate-700">
-                                {formatCurrency(
-                                  product.price ?? product.value ?? 0
-                                )}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="py-3 text-xs text-slate-500">
-                          No product details available for this brand.
-                        </p>
-                      )}
-                    </div>
+                      <div className="mt-auto flex flex-wrap gap-2 border-t border-[#edf0f4] pt-4">
+                        <button
+                          type="button"
+                          onClick={() => openEditForm(selectedBrand)}
+                          className="inline-flex items-center gap-2 rounded-lg border border-[#dce2e9] px-4 py-2 text-xs font-semibold text-[#102a3b] hover:bg-slate-50"
+                        >
+                          <Pencil size={14} />
+                          Edit
+                        </button>
 
-                    <div className="mt-auto flex flex-wrap gap-2 border-t border-[#edf0f4] pt-4">
-                      <button
-                        type="button"
-                        onClick={() => openEditForm(selectedBrand)}
-                        className="inline-flex items-center gap-2 rounded-lg border border-[#dce2e9] px-4 py-2 text-xs font-semibold text-[#102a3b] hover:bg-slate-50"
-                      >
-                        <Pencil size={14} />
-                        Edit
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setDeleteTarget(selectedBrand)}
-                        className="inline-flex items-center gap-2 rounded-lg bg-[#df2929] px-4 py-2 text-xs font-semibold text-white hover:bg-[#c91f1f]"
-                      >
-                        <Trash2 size={14} />
-                        Delete
-                      </button>
-                    </div>
-                  </>
-                )}
-                           </div>
-            </div>
-          )}
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget(selectedBrand)}
+                          className="inline-flex items-center gap-2 rounded-lg bg-[#df2929] px-4 py-2 text-xs font-semibold text-white hover:bg-[#c91f1f]"
+                        >
+                          <Trash2 size={14} />
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </section>
         </main>
       </div>
 
-      {/* Add/Edit form appears only after clicking Add brand or Edit */}
+      {/* Add/Edit form */}
       {formOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-[#071827]/45 p-4"
@@ -869,9 +840,7 @@ className="cursor-pointer border-b border-[#edf0f4] last:border-b-0 bg-white tra
               cannot be undone.
             </p>
 
-            
-<div className="mt-4 flex shrink-0 gap-3 border-t border-[#e1e5ec] pt-4">
-
+            <div className="mt-4 flex shrink-0 gap-3 border-t border-[#e1e5ec] pt-4">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
@@ -899,16 +868,3 @@ className="cursor-pointer border-b border-[#edf0f4] last:border-b-0 bg-white tra
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

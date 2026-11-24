@@ -9,7 +9,8 @@ export async function getShipmentsByUserId(userId) {
     const [shipments] = await db.query(
         `SELECT *
          FROM shipments
-         WHERE user_id = ?`,
+         WHERE user_id = ?
+         ORDER BY created_at DESC`,
         [userId]
     );
 
@@ -39,7 +40,8 @@ export async function getShipmentsByBrandId(brandId, userId) {
         `SELECT *
          FROM shipments
          WHERE brand_id = ?
-         AND user_id = ?`,
+         AND user_id = ?
+         ORDER BY created_at DESC`,
         [brandId, userId]
     );
 
@@ -54,7 +56,8 @@ export async function getShipmentsByProductId(productId, userId) {
         `SELECT *
          FROM shipments
          WHERE product_id = ?
-         AND user_id = ?`,
+         AND user_id = ?
+         ORDER BY created_at DESC`,
         [productId, userId]
     );
 
@@ -154,21 +157,18 @@ export async function updateShipmentStatus(
                 `INSERT INTO audit_logs
                     (user_id, shipment_id, old_status, new_status)
                  VALUES (?, ?, ?, ?)`,
-                [
-                    userId,
-                    shipmentId,
-                    oldStatus,
-                    status
-                ]
+                [userId, shipmentId, oldStatus, status]
             );
         }
 
         await connection.commit();
 
         return result;
+
     } catch (error) {
         await connection.rollback();
         throw error;
+
     } finally {
         connection.release();
     }
