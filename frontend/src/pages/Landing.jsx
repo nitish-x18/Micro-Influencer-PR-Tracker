@@ -1,3 +1,4 @@
+
 import {
   ArrowRight,
   CalendarDays,
@@ -11,6 +12,7 @@ import {
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
+
 function Landing() {
   const navigate = useNavigate();
 
@@ -28,60 +30,49 @@ function Landing() {
   }
 
   const handleGetStarted = () => {
-    if (session) {
-      navigate("/dashboard");
-    } else {
-      navigate("/register");
-    }
+    navigate(session ? "/dashboard" : "/register");
   };
 
   const handleSignIn = () => {
-    if (session) {
-      navigate("/dashboard");
-    } else {
-      navigate("/login");
-    }
+    navigate(session ? "/dashboard" : "/login");
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <div className="min-h-screen w-full overflow-x-hidden bg-white text-slate-900">
       <Navbar />
 
-      {/* =========================================================
-          HERO
-      ========================================================= */}
-      <section className="bg-white px-5 py-8 md:px-8 lg:px-10">
-        <div className="mx-auto max-w-[1360px] overflow-hidden rounded-[4px] bg-[#09263f]">
-          <div className="relative min-h-[500px] overflow-hidden">
+      {/* HERO */}
+      <section className="bg-white px-3 py-5 sm:px-5 sm:py-8 md:px-8 lg:px-10">
+        <div className="mx-auto max-w-[1360px] overflow-hidden rounded-lg bg-[#09263f]">
+          <div className="relative overflow-hidden">
             {/* Background decoration */}
-            <div className="absolute -right-20 top-0 h-[420px] w-[420px] rounded-full border border-cyan-500/20" />
-            <div className="absolute -right-5 top-20 h-[260px] w-[260px] rounded-full border border-cyan-500/20" />
+            <div className="pointer-events-none absolute -right-20 top-0 h-[420px] w-[420px] rounded-full border border-cyan-500/20" />
+            <div className="pointer-events-none absolute -right-5 top-20 h-[260px] w-[260px] rounded-full border border-cyan-500/20" />
 
-            <div className="relative grid min-h-[500px] items-center gap-8 px-5 py-10 sm:px-8 sm:py-12 lg:grid-cols-[0.9fr_1.1fr] lg:px-12">
-              {/* LEFT HERO CONTENT */}
-              <div className="relative z-10 max-w-[520px]">
-                <p className="mb-4 text-[11px] font-bold uppercase tracking-[2px] text-cyan-400">
+            <div className="relative grid items-center gap-10 px-5 py-10 sm:px-8 sm:py-12 lg:min-h-[500px] lg:grid-cols-[0.9fr_1.1fr] lg:gap-8 lg:px-12">
+              {/* LEFT CONTENT */}
+              <div className="relative z-10 mx-auto w-full max-w-[520px] lg:mx-0">
+                <p className="mb-4 text-[10px] font-bold uppercase tracking-[1.5px] text-cyan-400 sm:text-[11px] sm:tracking-[2px]">
                   PR PACKAGE TRACKER FOR CREATORS
                 </p>
 
-                <h1 className="text-3xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-4xl lg:text-5xl">
-                  Never lose track of a
-                  <br />
+                <h1 className="text-[32px] font-extrabold leading-[1.12] tracking-tight text-white min-[400px]:text-4xl sm:text-5xl lg:text-5xl">
+                  Never lose track of a{" "}
                   <span className="text-cyan-400">PR package</span> again.
                 </h1>
 
-                <p className="mt-5 max-w-[500px] text-[15px] leading-6 text-slate-300">
+                <p className="mt-5 max-w-[500px] text-sm leading-6 text-slate-300 sm:text-[15px]">
                   Keep brands, products, shipments and content deadlines in one
                   calm place, so you always know what has arrived and what is
                   due next.
                 </p>
 
-                <div className="mt-7 flex flex-wrap gap-3">
+                <div className="mt-7 flex flex-col gap-3 min-[380px]:flex-row min-[380px]:flex-wrap">
                   {session ? (
                     <button
                       type="button"
                       onClick={() => navigate("/dashboard")}
-                      className="inline-flex items-center gap-2 rounded-md bg-[#e56b3e] px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-[#d85d31]"
+                      className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-[#e56b3e] px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-[#d85d31] min-[380px]:w-auto"
                     >
                       Go to dashboard
                       <ArrowRight size={16} />
@@ -91,7 +82,7 @@ function Landing() {
                       <button
                         type="button"
                         onClick={handleGetStarted}
-                        className="inline-flex items-center gap-2 rounded-md bg-[#e56b3e] px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-[#d85d31]"
+                        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-[#e56b3e] px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-[#d85d31] min-[380px]:w-auto"
                       >
                         Get started free
                         <ArrowRight size={16} />
@@ -100,7 +91,7 @@ function Landing() {
                       <button
                         type="button"
                         onClick={handleSignIn}
-                        className="rounded-md border border-slate-500 bg-transparent px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                        className="min-h-11 w-full rounded-md border border-slate-500 bg-transparent px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10 min-[380px]:w-auto"
                       >
                         Sign in
                       </button>
@@ -115,18 +106,19 @@ function Landing() {
                 </div>
               </div>
 
-              {/* DASHBOARD MOCKUP */}
+              {/* DASHBOARD PREVIEW */}
               <DashboardPreview />
             </div>
           </div>
         </div>
       </section>
 
-      {/* =========================================================
-          FEATURES
-      ========================================================= */}
-      <section id="features" className="bg-white px-5 pb-8 md:px-8 lg:px-10">
-        <div className="mx-auto grid max-w-[1360px] grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+      {/* FEATURES */}
+      <section
+        id="features"
+        className="bg-white px-3 pb-8 sm:px-5 md:px-8 lg:px-10"
+      >
+        <div className="mx-auto grid max-w-[1360px] grid-cols-1 gap-3 min-[520px]:grid-cols-2 lg:grid-cols-4">
           <FeatureCard
             icon={<Package size={17} />}
             title="Track shipments"
@@ -153,14 +145,12 @@ function Landing() {
         </div>
       </section>
 
-      {/* =========================================================
-          HOW IT WORKS
-      ========================================================= */}
+      {/* HOW IT WORKS */}
       <section
         id="how-it-works"
-        className="border-t border-slate-200 bg-white px-5 py-7 md:px-8 lg:px-10"
+        className="border-t border-slate-200 bg-white px-4 py-7 sm:px-5 md:px-8 lg:px-10"
       >
-        <div className="mx-auto flex max-w-[1360px] flex-wrap items-center gap-x-8 gap-y-4 sm:justify-center lg:justify-start">
+        <div className="mx-auto flex max-w-[1360px] flex-wrap items-center gap-x-8 gap-y-5 sm:justify-center lg:justify-start">
           <Step number="1" text="Add a brand" />
           <Step number="2" text="Add products" />
           <Step number="3" text="Track shipments" />
@@ -168,20 +158,18 @@ function Landing() {
         </div>
       </section>
 
-      {/* =========================================================
-    CONTACT
-========================================================= */}
+      {/* CONTACT */}
       <section
         id="contact"
-        className="border-t border-slate-200 bg-[#f7f9fc] px-5 py-12 md:px-8 lg:px-10"
+        className="border-t border-slate-200 bg-[#f7f9fc] px-3 py-8 sm:px-5 sm:py-12 md:px-8 lg:px-10"
       >
-        <div className="mx-auto flex max-w-[1360px] flex-col items-start justify-between gap-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:flex-row md:items-center md:px-8 md:py-7">
-          <div>
+        <div className="mx-auto flex max-w-[1360px] flex-col items-start justify-between gap-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 md:flex-row md:items-center md:px-8 md:py-7">
+          <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[2px] text-cyan-500">
               Need help?
             </p>
 
-            <h2 className="mt-2 text-xl font-extrabold text-[#12336d]">
+            <h2 className="mt-2 text-lg font-extrabold text-[#12336d] sm:text-xl">
               Have a question about InfluenceFlow?
             </h2>
 
@@ -193,7 +181,7 @@ function Landing() {
 
           <a
             href="mailto:support@influenceflow.in"
-            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-[#e56b3e] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#d85d31]"
+            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-lg bg-[#e56b3e] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#d85d31] md:w-auto"
           >
             Contact support
           </a>
@@ -205,28 +193,28 @@ function Landing() {
   );
 }
 
-/* =========================================================
-   DASHBOARD PREVIEW
-========================================================= */
+/* DASHBOARD PREVIEW */
 
 function DashboardPreview() {
   return (
-    <div id="dashboard" className="relative z-10 mx-auto w-full max-w-[650px]">
-      {/* Browser */}
+    <div
+      id="dashboard"
+      className="relative z-10 mx-auto w-full min-w-0 max-w-[650px]"
+    >
       <div className="overflow-hidden rounded-xl border border-slate-300/50 bg-white shadow-2xl">
         {/* Browser top */}
-        <div className="flex h-8 items-center gap-2 border-b border-slate-200 bg-slate-100 px-3">
-          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+        <div className="flex h-8 min-w-0 items-center gap-2 border-b border-slate-200 bg-slate-100 px-2 sm:px-3">
+          <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-slate-300" />
+          <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-slate-300" />
+          <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-slate-300" />
 
-          <div className="ml-3 h-4 flex-1 rounded-full bg-white px-3 text-[7px] leading-4 text-slate-400">
+          <div className="ml-2 min-w-0 flex-1 truncate rounded-full bg-white px-3 text-[7px] leading-4 text-slate-400 sm:ml-3">
             app.influenceflow.in/dashboard
           </div>
         </div>
 
         {/* App */}
-        <div className="flex min-h-[315px]">
+        <div className="flex min-h-[280px] sm:min-h-[315px]">
           {/* Sidebar */}
           <aside className="hidden w-[145px] shrink-0 bg-[#102a43] p-3 sm:block">
             <div className="mb-6 rounded-md bg-white px-2 py-2">
@@ -249,17 +237,17 @@ function DashboardPreview() {
           </aside>
 
           {/* Main */}
-          <div className="min-w-0 flex-1 bg-slate-50 p-4">
-            <div className="flex items-center justify-between">
+          <div className="min-w-0 flex-1 bg-slate-50 p-2.5 sm:p-4">
+            <div className="flex items-center justify-between gap-2">
               <h3 className="text-sm font-bold text-slate-800">Dashboard</h3>
 
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500 text-[7px] font-bold text-white">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan-500 text-[7px] font-bold text-white">
                 AM
               </div>
             </div>
 
             {/* Stats */}
-            <div className="mt-4 grid grid-cols-3 gap-2">
+            <div className="mt-4 grid grid-cols-1 gap-2 min-[400px]:grid-cols-3">
               <StatCard
                 label="Active shipments"
                 value="12"
@@ -272,11 +260,15 @@ function DashboardPreview() {
                 icon={<Clock3 size={11} />}
               />
 
-              <StatCard label="Overdue" value="2" icon={<Clock3 size={11} />} />
+              <StatCard
+                label="Overdue"
+                value="2"
+                icon={<Clock3 size={11} />}
+              />
             </div>
 
             {/* Deadlines */}
-            <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3">
+            <div className="mt-3 rounded-lg border border-slate-200 bg-white p-2.5 sm:p-3">
               <div className="mb-3 text-[10px] font-bold text-slate-800">
                 Upcoming deadlines
               </div>
@@ -310,16 +302,18 @@ function DashboardPreview() {
         </div>
       </div>
 
-      {/* Floating notification */}
+      {/* Floating notifications */}
       <div className="absolute -bottom-4 left-0 hidden rounded-lg border border-slate-200 bg-white px-4 py-3 text-[9px] shadow-xl sm:block">
         <div className="flex items-center gap-2 font-bold text-slate-700">
-          <Clock3 size={12} />3 deadlines this week
+          <Clock3 size={12} />
+          3 deadlines this week
         </div>
 
-        <div className="mt-1 text-slate-400">Next: Skincare Kit, 15 Oct.</div>
+        <div className="mt-1 text-slate-400">
+          Next: Skincare Kit, 15 Oct.
+        </div>
       </div>
 
-      {/* Shipment notification */}
       <div className="absolute -bottom-4 right-0 hidden rounded-lg border border-slate-200 bg-white px-4 py-3 text-[9px] shadow-xl sm:block">
         <div className="flex items-center gap-2 font-bold text-slate-700">
           <Check size={12} className="text-green-500" />
@@ -334,9 +328,7 @@ function DashboardPreview() {
   );
 }
 
-/* =========================================================
-   SMALL COMPONENTS
-========================================================= */
+/* SMALL COMPONENTS */
 
 function TrustBadge({ text }) {
   return (
@@ -353,9 +345,13 @@ function FeatureCard({ icon, title, text }) {
         {icon}
       </div>
 
-      <h3 className="mt-3 text-[13px] font-bold text-[#12336d]">{title}</h3>
+      <h3 className="mt-3 text-[13px] font-bold text-[#12336d]">
+        {title}
+      </h3>
 
-      <p className="mt-1 text-[11px] leading-5 text-slate-500">{text}</p>
+      <p className="mt-1 text-[11px] leading-5 text-slate-500">
+        {text}
+      </p>
     </div>
   );
 }
@@ -363,7 +359,7 @@ function FeatureCard({ icon, title, text }) {
 function Step({ number, text }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500 text-[10px] font-bold text-white">
+      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan-500 text-[10px] font-bold text-white">
         {number}
       </div>
 
@@ -387,21 +383,23 @@ function SidebarItem({ icon, text, active }) {
 
 function StatCard({ label, value, icon }) {
   return (
-    <div className="rounded-md border border-slate-200 bg-white p-2.5">
-      <div className="flex items-center gap-1 text-[7px] text-slate-400">
+    <div className="min-w-0 rounded-md border border-slate-200 bg-white p-2.5">
+      <div className="flex flex-wrap items-center gap-1 text-[7px] text-slate-400">
         {icon}
-        {label}
+        <span>{label}</span>
       </div>
 
-      <div className="mt-1 text-lg font-extrabold text-slate-800">{value}</div>
+      <div className="mt-1 text-lg font-extrabold text-slate-800">
+        {value}
+      </div>
     </div>
   );
 }
 
 function Deadline({ date, month, title, platform, status, overdue }) {
   return (
-    <div className="mb-2 flex items-center gap-2 rounded-md border border-slate-100 p-2 last:mb-0">
-      <div className="w-8 text-center">
+    <div className="mb-2 flex min-w-0 items-center gap-2 rounded-md border border-slate-100 p-2 last:mb-0">
+      <div className="w-8 shrink-0 text-center">
         <div className="text-sm font-bold text-slate-800">{date}</div>
         <div className="text-[6px] text-slate-400">{month}</div>
       </div>
@@ -411,12 +409,16 @@ function Deadline({ date, month, title, platform, status, overdue }) {
           {title}
         </div>
 
-        <div className="mt-0.5 text-[7px] text-slate-400">{platform}</div>
+        <div className="mt-0.5 text-[7px] text-slate-400">
+          {platform}
+        </div>
       </div>
 
       <span
-        className={`rounded-full px-2 py-1 text-[6px] font-semibold ${
-          overdue ? "bg-red-50 text-red-500" : "bg-orange-50 text-orange-500"
+        className={`shrink-0 rounded-full px-2 py-1 text-[6px] font-semibold ${
+          overdue
+            ? "bg-red-50 text-red-500"
+            : "bg-orange-50 text-orange-500"
         }`}
       >
         {status}

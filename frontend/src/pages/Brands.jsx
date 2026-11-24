@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
+import MobileMenuButton from "../components/MobileMenuButton";
 import { brandService } from "../services/brandService";
 
 const formatCurrency = (value) =>
@@ -243,9 +244,12 @@ export default function Brands() {
       <Sidebar />
 
       <div className="min-w-0 flex-1">
-        {/* Page header - same as Shipments */}
+        {/* Page Header */}
         <header className="flex h-[72px] items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-7">
-          <h1 className="text-xl font-extrabold">Brands</h1>
+          <div className="flex items-center gap-3">
+            <MobileMenuButton />
+            <h1 className="text-xl font-extrabold">Brands</h1>
+          </div>
 
           <div className="flex items-center gap-3 sm:gap-5">
             <span className="rounded-full p-2 text-slate-600">
@@ -359,8 +363,9 @@ export default function Brands() {
                     : "h-[440px]"
                 }`}
               >
-                <div className="h-full overflow-auto">
-                  <table className="w-full table-fixed border-collapse text-left text-xs">
+                {/* Mobile horizontal scrolling fix */}
+                <div className="h-full w-full overflow-x-auto overflow-y-auto">
+                  <table className="w-full min-w-[560px] table-fixed border-collapse text-left text-xs md:min-w-full">
                     <thead className="sticky top-0 z-10 bg-[#0b293d] text-white">
                       <tr>
                         <th className="w-[43%] px-3 py-3 font-semibold">
@@ -427,7 +432,8 @@ export default function Brands() {
                                   <span
                                     className="flex h-[28px] w-[28px] shrink-0 items-center justify-center overflow-hidden rounded-[9px] text-sm font-bold text-white"
                                     style={{
-                                      backgroundColor: brand.color || "#4c52f4",
+                                      backgroundColor:
+                                        brand.color || "#4c52f4",
                                     }}
                                   >
                                     {brand.logoUrl ||
@@ -600,7 +606,6 @@ export default function Brands() {
                           <p className="text-[11px] text-slate-500">
                             Products
                           </p>
-
                           <p className="mt-1 text-xl font-bold text-[#102a3b]">
                             {getProductCount(selectedBrand)}
                           </p>
@@ -610,7 +615,6 @@ export default function Brands() {
                           <p className="text-[11px] text-slate-500">
                             In transit
                           </p>
-
                           <p className="mt-1 text-xl font-bold text-[#102a3b]">
                             {getShipmentCount(selectedBrand)}
                           </p>
@@ -754,10 +758,7 @@ export default function Brands() {
                   type="text"
                   value={form.websiteUrl}
                   onChange={(event) =>
-                    setForm({
-                      ...form,
-                      websiteUrl: event.target.value,
-                    })
+                    setForm({ ...form, websiteUrl: event.target.value })
                   }
                   placeholder="example.com"
                   className="h-11 w-full rounded-lg border border-[#dce2eb] px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -773,10 +774,7 @@ export default function Brands() {
                   rows={3}
                   value={form.description}
                   onChange={(event) =>
-                    setForm({
-                      ...form,
-                      description: event.target.value,
-                    })
+                    setForm({ ...form, description: event.target.value })
                   }
                   placeholder="Short description"
                   className="w-full resize-y rounded-lg border border-[#dce2eb] px-3 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -801,7 +799,6 @@ export default function Brands() {
                   {saving && (
                     <LoaderCircle size={16} className="animate-spin" />
                   )}
-
                   {saving
                     ? "Saving..."
                     : editingBrand

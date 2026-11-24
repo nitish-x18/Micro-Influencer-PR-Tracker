@@ -1,3 +1,4 @@
+
 import { ArrowRight, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,7 +18,6 @@ function Navbar() {
     } catch {
       localStorage.removeItem("influenceflow_session");
       sessionStorage.removeItem("influenceflow_session");
-
       return null;
     }
   };
@@ -35,51 +35,45 @@ function Navbar() {
 
   const handleGetStarted = () => {
     closeMenu();
-
-    if (session) {
-      navigate("/dashboard");
-    } else {
-      navigate("/register");
-    }
+    navigate(session ? "/dashboard" : "/register");
   };
 
   const handleSignIn = () => {
     closeMenu();
-
-    if (session) {
-      navigate("/dashboard");
-    } else {
-      navigate("/login");
-    }
+    navigate(session ? "/dashboard" : "/login");
   };
 
   const handleLogout = () => {
     localStorage.removeItem("influenceflow_session");
     sessionStorage.removeItem("influenceflow_session");
-
     localStorage.removeItem("influenceflow_token");
     sessionStorage.removeItem("influenceflow_token");
 
     setSession(null);
     closeMenu();
-
     navigate("/", { replace: true });
   };
 
   return (
-    <header className="border-b border-slate-200 bg-white">
-      <nav className="mx-auto w-full max-w-[1400px] px-6 lg:px-10">
-        <div className="flex h-[74px] items-center justify-between">
+    <header className="w-full border-b border-slate-200 bg-white">
+      <nav className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-10">
+        <div className="flex min-h-[68px] w-full min-w-0 items-center justify-between gap-3 sm:min-h-[74px]">
+
           {/* Logo */}
-          <Link to="/" onClick={closeMenu} className="flex items-center">
+          <Link
+            to="/"
+            onClick={closeMenu}
+            className="flex min-w-0 shrink items-center"
+          >
             <img
               src={logo}
               alt="InfluenceFlow"
-              className="h-12 w-auto object-contain"
+              className="h-10 w-auto max-w-full shrink-0 object-contain sm:h-12"
             />
           </Link>
+
           {/* Desktop Navigation */}
-          <div className="hidden items-center gap-10 text-[14px] font-medium text-[#18345f] lg:flex">
+          <div className="hidden items-center gap-6 text-sm font-medium text-[#18345f] lg:flex xl:gap-10">
             <a href="#features" className="transition hover:text-cyan-500">
               Features
             </a>
@@ -98,13 +92,13 @@ function Navbar() {
           </div>
 
           {/* Desktop Actions */}
-          <div className="hidden items-center gap-3 lg:flex">
+          <div className="hidden shrink-0 items-center gap-3 lg:flex">
             {session ? (
               <>
                 <button
                   type="button"
                   onClick={handleDashboard}
-                  className="rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-[#17345f] transition hover:bg-slate-50"
+                  className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-[#17345f] transition hover:bg-slate-50"
                 >
                   Dashboard
                 </button>
@@ -112,7 +106,7 @@ function Navbar() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#e56b3e] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#d85d31]"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#e56b3e] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#d85d31]"
                 >
                   Logout
                 </button>
@@ -122,7 +116,7 @@ function Navbar() {
                 <button
                   type="button"
                   onClick={handleSignIn}
-                  className="rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-[#17345f] transition hover:bg-slate-50"
+                  className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-[#17345f] transition hover:bg-slate-50"
                 >
                   Sign in
                 </button>
@@ -130,7 +124,7 @@ function Navbar() {
                 <button
                   type="button"
                   onClick={handleGetStarted}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#e56b3e] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#d85d31]"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#e56b3e] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#d85d31]"
                 >
                   Get started
                   <ArrowRight size={16} />
@@ -143,9 +137,10 @@ function Navbar() {
           <button
             type="button"
             onClick={() => setMenuOpen((value) => !value)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-[#17345f] transition hover:bg-slate-50 lg:hidden"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-[#17345f] transition hover:bg-slate-50 lg:hidden"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
+            aria-controls="mobile-navigation"
           >
             {menuOpen ? <X size={21} /> : <Menu size={21} />}
           </button>
@@ -153,8 +148,11 @@ function Navbar() {
 
         {/* Mobile Menu */}
         {menuOpen && (
-          <div className="border-t border-slate-100 py-4 lg:hidden">
-            <div className="flex flex-col gap-1">
+          <div
+            id="mobile-navigation"
+            className="w-full border-t border-slate-100 py-4 lg:hidden"
+          >
+            <div className="flex w-full flex-col gap-1">
               <a
                 href="#features"
                 onClick={closeMenu}
@@ -187,13 +185,13 @@ function Navbar() {
                 Contact
               </a>
 
-              <div className="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-4">
+              <div className="mt-3 flex w-full flex-col gap-2 border-t border-slate-100 pt-4">
                 {session ? (
                   <>
                     <button
                       type="button"
                       onClick={handleDashboard}
-                      className="rounded-lg border border-slate-300 px-4 py-3 text-center text-sm font-semibold text-[#17345f] hover:bg-slate-50"
+                      className="w-full rounded-lg border border-slate-300 px-4 py-3 text-center text-sm font-semibold text-[#17345f] hover:bg-slate-50"
                     >
                       Dashboard
                     </button>
@@ -201,7 +199,7 @@ function Navbar() {
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="rounded-lg bg-[#e56b3e] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#d85d31]"
+                      className="w-full rounded-lg bg-[#e56b3e] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#d85d31]"
                     >
                       Logout
                     </button>
@@ -211,7 +209,7 @@ function Navbar() {
                     <button
                       type="button"
                       onClick={handleSignIn}
-                      className="rounded-lg border border-slate-300 px-4 py-3 text-center text-sm font-semibold text-[#17345f] hover:bg-slate-50"
+                      className="w-full rounded-lg border border-slate-300 px-4 py-3 text-center text-sm font-semibold text-[#17345f] hover:bg-slate-50"
                     >
                       Sign in
                     </button>
@@ -219,7 +217,7 @@ function Navbar() {
                     <button
                       type="button"
                       onClick={handleGetStarted}
-                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#e56b3e] px-4 py-3 text-sm font-semibold text-white hover:bg-[#d85d31]"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#e56b3e] px-4 py-3 text-sm font-semibold text-white hover:bg-[#d85d31]"
                     >
                       Get started
                       <ArrowRight size={16} />
