@@ -1,7 +1,10 @@
+
 import {
     registerUser,
     loginUser
 } from "../services/auth.service.js";
+
+import { revokeAccessToken } from "../models/authToken.model.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -34,15 +37,17 @@ export const login = asyncHandler(async (req, res) => {
     setAuthCookie(res, result.accessToken);
 
     return res.status(200).json(
-        new apiResponse(
-            200,
-            result,
-            "Login successful"
-        )
+        new apiResponse(200, result, "Login successful")
     );
 });
 
 export const logout = asyncHandler(async (req, res) => {
+    await revokeAccessToken(
+        req.accessToken,
+        req.user.user_id,
+        req.tokenExpiresAt
+    );
+
     res.clearCookie("accessToken", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -56,6 +61,10 @@ export const logout = asyncHandler(async (req, res) => {
 
 export const getCurrentUser = asyncHandler(async (req, res) => {
     return res.status(200).json(
-        new apiResponse(200, req.user, "Current user retrieved successfully")
+        new apiResponse(
+            200,
+            req.user,
+            "Current user retrieved successfully"
+        )
     );
 });

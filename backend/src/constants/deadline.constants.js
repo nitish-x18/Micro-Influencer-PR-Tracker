@@ -1,9 +1,10 @@
+
 export const CONTENT_PLATFORM = Object.freeze({
-    INSTAGRAM: "INSTAGRAM",
-    YOUTUBE: "YOUTUBE",
-    PINTEREST: "PINTEREST",
-    BLOG: "BLOG",
-    OTHER: "OTHER"
+    INSTAGRAM: "Instagram",
+    YOUTUBE: "YouTube",
+    PINTEREST: "Pinterest",
+    BLOG: "Blog",
+    OTHER: "Other"
 });
 
 export const CONTENT_PLATFORM_VALUES = Object.freeze(

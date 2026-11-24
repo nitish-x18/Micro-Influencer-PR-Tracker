@@ -1,13 +1,16 @@
+
 import { getDB } from "../config/databaseConfig.js";
 
-// Get all products
-export async function getAllProducts() {
+// Get all products belonging to a user
+export async function getAllProducts(userId) {
     const db = getDB();
 
     const [products] = await db.query(
         `SELECT product_id, user_id, brand_id, product_name,
                 value, currency, description, created_at
-         FROM products`
+         FROM products
+         WHERE user_id = ?`,
+        [userId]
     );
 
     return products;
@@ -18,7 +21,9 @@ export async function getProductsByUserId(userId) {
     const db = getDB();
 
     const [products] = await db.query(
-        "SELECT * FROM products WHERE user_id = ?",
+        `SELECT *
+         FROM products
+         WHERE user_id = ?`,
         [userId]
     );
 
@@ -30,20 +35,40 @@ export async function getProductById(productId) {
     const db = getDB();
 
     const [products] = await db.query(
-        "SELECT * FROM products WHERE product_id = ?",
+        `SELECT *
+         FROM products
+         WHERE product_id = ?`,
         [productId]
     );
 
     return products[0] ?? null;
 }
 
-// Get products by brand ID
-export async function getProductsByBrandId(brandId) {
+// Get product by ID and user ID
+export async function getProductByIdAndUserId(productId, userId) {
     const db = getDB();
 
     const [products] = await db.query(
-        "SELECT * FROM products WHERE brand_id = ?",
-        [brandId]
+        `SELECT *
+         FROM products
+         WHERE product_id = ?
+         AND user_id = ?`,
+        [productId, userId]
+    );
+
+    return products[0] ?? null;
+}
+
+// Get products by brand ID and user ID
+export async function getProductsByBrandId(brandId, userId) {
+    const db = getDB();
+
+    const [products] = await db.query(
+        `SELECT *
+         FROM products
+         WHERE brand_id = ?
+         AND user_id = ?`,
+        [brandId, userId]
     );
 
     return products;
@@ -62,8 +87,8 @@ export async function createProduct(
 
     const [result] = await db.query(
         `INSERT INTO products
-        (user_id, brand_id, product_name, value, currency, description)
-        VALUES (?, ?, ?, ?, ?, ?)`,
+         (user_id, brand_id, product_name, value, currency, description)
+         VALUES (?, ?, ?, ?, ?, ?)`,
         [
             userId,
             brandId,
@@ -77,9 +102,10 @@ export async function createProduct(
     return result;
 }
 
-// Update a product
+// Update product belonging to a user
 export async function updateProduct(
     productId,
+    userId,
     productName,
     value,
     currency,
@@ -93,26 +119,30 @@ export async function updateProduct(
              value = ?,
              currency = ?,
              description = ?
-         WHERE product_id = ?`,
+         WHERE product_id = ?
+         AND user_id = ?`,
         [
             productName,
             value,
             currency,
             description,
-            productId
+            productId,
+            userId
         ]
     );
 
     return result;
 }
 
-// Delete a product
-export async function deleteProduct(productId) {
+// Delete product belonging to a user
+export async function deleteProduct(productId, userId) {
     const db = getDB();
 
     const [result] = await db.query(
-        "DELETE FROM products WHERE product_id = ?",
-        [productId]
+        `DELETE FROM products
+         WHERE product_id = ?
+         AND user_id = ?`,
+        [productId, userId]
     );
 
     return result;

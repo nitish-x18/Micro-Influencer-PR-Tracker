@@ -1,3 +1,4 @@
+
 import { CONTENT_PLATFORM_VALUES } from "../constants/deadline.constants.js";
 
 const isPositiveId = (value) => {
@@ -10,7 +11,7 @@ const isPositiveId = (value) => {
 
     const id = String(value);
 
-    return /^\d+$/.test(id) && BigInt(id) > 0n;
+    return /^[1-9]\d*$/.test(id);
 };
 
 const isValidDate = (value) => {
@@ -29,12 +30,28 @@ const isValidDate = (value) => {
     );
 };
 
+const validateNotes = (notes, errors) => {
+    if (
+        notes !== undefined &&
+        notes !== null &&
+        typeof notes !== "string"
+    ) {
+        errors.push("Notes must be a string");
+        return;
+    }
+
+    if (typeof notes === "string" && notes.length > 500) {
+        errors.push("Notes must not exceed 500 characters");
+    }
+};
+
 const validateDeadlineFields = (body, errors, partial = false) => {
     const allowedFields = [
-        "shipment_id",
+        ...(partial ? [] : ["shipment_id"]),
         "content_title",
         "platform",
-        "due_date"
+        "due_date",
+        "notes"
     ];
 
     const unknownFields = Object.keys(body).filter(
@@ -73,35 +90,47 @@ const validateDeadlineFields = (body, errors, partial = false) => {
             errors.push("Due date must be a valid date in YYYY-MM-DD format");
         }
     }
+
+    if ("notes" in body) {
+        validateNotes(body.notes, errors);
+    }
 };
 
 export const createDeadlineValidator = (body = {}) => {
     const errors = [];
+
     validateDeadlineFields(body, errors);
+
     return errors;
 };
 
 export const updateDeadlineValidator = (body = {}) => {
     const errors = [];
 
-    if (Object.keys(body).length === 0) {
+    if (
+        !body ||
+        typeof body !== "object" ||
+        Array.isArray(body) ||
+        Object.keys(body).length === 0
+    ) {
         errors.push("Provide at least one field to update");
         return errors;
     }
 
     validateDeadlineFields(body, errors, true);
+
     return errors;
 };
 
 export const completeDeadlineValidator = (body = {}) => {
     const errors = [];
-    const allowedFields = [];
 
-    const unknownFields = Object.keys(body).filter(
-        (key) => !allowedFields.includes(key)
-    );
-
-    if (unknownFields.length > 0) {
+    if (
+        !body ||
+        typeof body !== "object" ||
+        Array.isArray(body) ||
+        Object.keys(body).length > 0
+    ) {
         errors.push("This endpoint does not accept request body fields");
     }
 
