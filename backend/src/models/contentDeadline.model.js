@@ -1,17 +1,7 @@
+
 import { getDB } from "../config/databaseConfig.js";
 
-// Get all content deadlines
-export async function getAllContentDeadlines() {
-    const db = getDB();
-
-    const [deadlines] = await db.query(
-        "SELECT * FROM content_deadlines"
-    );
-
-    return deadlines;
-}
-
-// Get deadlines by user ID
+// Get deadlines belonging to a user
 export async function getContentDeadlinesByUserId(userId) {
     const db = getDB();
 
@@ -26,34 +16,44 @@ export async function getContentDeadlinesByUserId(userId) {
     return deadlines;
 }
 
-// Get deadline by ID
-export async function getContentDeadlineById(deadlineId) {
+// Get a deadline by ID and owner
+export async function getContentDeadlineByIdAndUserId(
+    deadlineId,
+    userId
+) {
     const db = getDB();
 
     const [deadlines] = await db.query(
-        "SELECT * FROM content_deadlines WHERE deadline_id = ?",
-        [deadlineId]
+        `SELECT *
+         FROM content_deadlines
+         WHERE deadline_id = ?
+         AND user_id = ?`,
+        [deadlineId, userId]
     );
 
     return deadlines[0] ?? null;
 }
 
-// Get deadlines by shipment ID
-export async function getContentDeadlinesByShipmentId(shipmentId) {
+// Get deadlines belonging to a shipment and user
+export async function getContentDeadlinesByShipmentId(
+    shipmentId,
+    userId
+) {
     const db = getDB();
 
     const [deadlines] = await db.query(
         `SELECT *
          FROM content_deadlines
          WHERE shipment_id = ?
+         AND user_id = ?
          ORDER BY due_date ASC`,
-        [shipmentId]
+        [shipmentId, userId]
     );
 
     return deadlines;
 }
 
-// Create a new content deadline
+// Create a content deadline
 export async function createContentDeadline(
     userId,
     shipmentId,
@@ -91,9 +91,10 @@ export async function createContentDeadline(
     return result;
 }
 
-// Update a content deadline
+// Update a deadline belonging to a user
 export async function updateContentDeadline(
     deadlineId,
+    userId,
     contentTitle,
     platform,
     dueDate,
@@ -114,7 +115,8 @@ export async function updateContentDeadline(
                  THEN COALESCE(completed_at, CURRENT_TIMESTAMP)
                  ELSE NULL
              END
-         WHERE deadline_id = ?`,
+         WHERE deadline_id = ?
+         AND user_id = ?`,
         [
             contentTitle,
             platform,
@@ -122,20 +124,26 @@ export async function updateContentDeadline(
             status,
             notes,
             status,
-            deadlineId
+            deadlineId,
+            userId
         ]
     );
 
     return result;
 }
 
-// Delete a content deadline
-export async function deleteContentDeadline(deadlineId) {
+// Delete a deadline belonging to a user
+export async function deleteContentDeadline(
+    deadlineId,
+    userId
+) {
     const db = getDB();
 
     const [result] = await db.query(
-        "DELETE FROM content_deadlines WHERE deadline_id = ?",
-        [deadlineId]
+        `DELETE FROM content_deadlines
+         WHERE deadline_id = ?
+         AND user_id = ?`,
+        [deadlineId, userId]
     );
 
     return result;

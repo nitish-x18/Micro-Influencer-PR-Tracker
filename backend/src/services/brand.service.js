@@ -1,3 +1,4 @@
+
 import * as brandModel from "../models/brand.model.js";
 import { apiError } from "../utils/apiError.js";
 
@@ -14,14 +15,18 @@ const parseId = (value, fieldName = "ID") => {
 const validateBrandData = (data, isUpdate = false) => {
     const errors = [];
 
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+        throw new apiError(400, "Invalid brand data");
+    }
+
     if (!isUpdate || data.brand_name !== undefined) {
         if (
             typeof data.brand_name !== "string" ||
             !data.brand_name.trim()
         ) {
             errors.push("Brand name is required");
-        } else if (data.brand_name.trim().length > 255) {
-            errors.push("Brand name must not exceed 255 characters");
+        } else if (data.brand_name.trim().length > 100) {
+            errors.push("Brand name must not exceed 100 characters");
         }
     }
 
@@ -31,41 +36,35 @@ const validateBrandData = (data, isUpdate = false) => {
             data[field] !== null &&
             typeof data[field] !== "string"
         ) {
-            errors.push(`${field} must be a string`);
+            errors.push(`${field} must be a string or null`);
         }
     }
 
     if (
         typeof data.description === "string" &&
-        data.description.length > 5000
+        data.description.length > 500
     ) {
-        errors.push("Description must not exceed 5000 characters");
+        errors.push("Description must not exceed 500 characters");
     }
 
-    if (typeof data.website === "string" && data.website.trim()) {
-        try {
-            const url = new URL(data.website.trim());
+    for (const field of ["website", "logo_url"]) {
+        const value = data[field];
 
-            if (!["http:", "https:"].includes(url.protocol)) {
-                errors.push("Website must use HTTP or HTTPS");
+        if (typeof value === "string" && value.trim()) {
+            if (value.length > 255) {
+                errors.push(`${field} must not exceed 255 characters`);
+                continue;
             }
-        } catch {
-            errors.push("Website must be a valid URL");
-        }
-    }
 
-    if (
-        typeof data.logo_url === "string" &&
-        data.logo_url.trim()
-    ) {
-        try {
-            const url = new URL(data.logo_url.trim());
+            try {
+                const url = new URL(value.trim());
 
-            if (!["http:", "https:"].includes(url.protocol)) {
-                errors.push("Logo URL must use HTTP or HTTPS");
+                if (!["http:", "https:"].includes(url.protocol)) {
+                    errors.push(`${field} must use HTTP or HTTPS`);
+                }
+            } catch {
+                errors.push(`${field} must be a valid URL`);
             }
-        } catch {
-            errors.push("Logo URL must be a valid URL");
         }
     }
 
@@ -76,17 +75,21 @@ const validateBrandData = (data, isUpdate = false) => {
 
 const getOwnedBrand = async (brandId, userId) => {
     const id = parseId(brandId, "brand ID");
-    const brand = await brandModel.getBrandById(id);
 
-    if (!brand || String(brand.user_id) !== String(userId)) {
+    const brand = await brandModel.getBrandByIdAndUserId(
+        id,
+        userId
+    );
+
+    if (!brand) {
         throw new apiError(404, "Brand not found");
     }
 
     return brand;
 };
 
-// Create a brand
 export const createBrand = async (userId, data) => {
+    parseId(userId, "user ID");
     validateBrandData(data);
 
     const result = await brandModel.createBrand(
@@ -97,20 +100,19 @@ export const createBrand = async (userId, data) => {
         data.logo_url?.trim() || null
     );
 
-    return brandModel.getBrandById(result.insertId);
+    return getOwnedBrand(result.insertId, userId);
 };
 
-// Get all brands belonging to the current user
 export const getBrands = async (userId) => {
+    parseId(userId, "user ID");
+
     return brandModel.getBrandsByUserId(userId);
 };
 
-// Get one brand belonging to the current user
 export const getBrandById = async (brandId, userId) => {
     return getOwnedBrand(brandId, userId);
 };
 
-// Update a brand
 export const updateBrand = async (brandId, userId, data) => {
     const existing = await getOwnedBrand(brandId, userId);
 
@@ -138,24 +140,29 @@ export const updateBrand = async (brandId, userId, data) => {
 
     await brandModel.updateBrand(
         existing.brand_id,
+        userId,
         brandName,
         description,
         website,
         logoUrl
     );
 
-    return brandModel.getBrandById(existing.brand_id);
+    return getOwnedBrand(existing.brand_id, userId);
 };
 
-// Delete a brand
 export const deleteBrand = async (brandId, userId) => {
     const brand = await getOwnedBrand(brandId, userId);
 
-    const result = await brandModel.deleteBrand(brand.brand_id);
+    const result = await brandModel.deleteBrand(
+        brand.brand_id,
+        userId
+    );
 
     if (!result.affectedRows) {
         throw new apiError(404, "Brand not found");
     }
 
-    return { brand_id: brand.brand_id };
+    return {
+        brand_id: brand.brand_id
+    };
 };

@@ -1,19 +1,14 @@
+
 import * as deadlineModel from "../models/contentDeadline.model.js";
 import * as shipmentModel from "../models/shipment.model.js";
 import { apiError } from "../utils/apiError.js";
 
 const ALLOWED_PLATFORMS = [
-    "INSTAGRAM",
-    "YOUTUBE",
-    "PINTEREST",
-    "BLOG",
-    "OTHER"
-];
-
-const ALLOWED_STATUSES = [
-    "UPCOMING",
-    "OVERDUE",
-    "COMPLETED"
+    "Instagram",
+    "YouTube",
+    "Pinterest",
+    "Blog",
+    "Other"
 ];
 
 const parseId = (value, fieldName = "ID") => {
@@ -26,30 +21,64 @@ const parseId = (value, fieldName = "ID") => {
     return id;
 };
 
+// Convert a database date into YYYY-MM-DD
+const formatDate = (value) => {
+    if (value instanceof Date) {
+        const year = value.getFullYear();
+        const month = String(value.getMonth() + 1).padStart(2, "0");
+        const day = String(value.getDate()).padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
+    }
+
+    return String(value ?? "").slice(0, 10);
+};
+
+// Get today's date in YYYY-MM-DD format
+const getTodayDate = () => {
+    const today = new Date();
+
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+};
+
+// Get a deadline only if it belongs to the logged-in user
 const getOwnedDeadline = async (deadlineId, userId) => {
     const id = parseId(deadlineId, "deadline ID");
-    const deadline = await deadlineModel.getContentDeadlineById(id);
 
-    if (!deadline || String(deadline.user_id) !== String(userId)) {
+    const deadline =
+        await deadlineModel.getContentDeadlineByIdAndUserId(id, userId);
+
+    if (!deadline) {
         throw new apiError(404, "Content deadline not found");
     }
 
     return deadline;
 };
 
+// Verify that the shipment belongs to the logged-in user
 const verifyOwnedShipment = async (shipmentId, userId) => {
     const id = parseId(shipmentId, "shipment ID");
-    const shipment = await shipmentModel.getShipmentById(id);
 
-    if (!shipment || String(shipment.user_id) !== String(userId)) {
+    const shipment = await shipmentModel.getShipmentById(id, userId);
+
+    if (!shipment) {
         throw new apiError(404, "Shipment not found");
     }
 
     return shipment;
 };
 
+// Validate deadline data
 const validateDeadlineData = (data, isUpdate = false) => {
     const errors = [];
+
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+        throw new apiError(400, "Invalid content deadline data");
+    }
 
     if (!isUpdate || data.content_title !== undefined) {
         if (
@@ -94,8 +123,8 @@ const validateDeadlineData = (data, isUpdate = false) => {
         errors.push("Notes must be a string");
     }
 
-    if (typeof data.notes === "string" && data.notes.length > 5000) {
-        errors.push("Notes must not exceed 5000 characters");
+    if (typeof data.notes === "string" && data.notes.length > 500) {
+        errors.push("Notes must not exceed 500 characters");
     }
 
     if (errors.length > 0) {
@@ -103,18 +132,19 @@ const validateDeadlineData = (data, isUpdate = false) => {
     }
 };
 
+// Calculate deadline status automatically
 const deriveStatus = (deadline) => {
     if (deadline.completed_at || deadline.status === "COMPLETED") {
         return "COMPLETED";
     }
 
-    // Compare calendar dates, not UTC timestamps.
-    const today = new Date().toLocaleDateString("en-CA");
+    const dueDate = formatDate(deadline.due_date);
+    const today = getTodayDate();
 
-    return deadline.due_date < today ? "OVERDUE" : "UPCOMING";
+    return dueDate < today ? "OVERDUE" : "UPCOMING";
 };
 
-// Create deadline
+// Create a deadline
 export const createDeadline = async (userId, data) => {
     validateDeadlineData(data);
 
@@ -129,12 +159,18 @@ export const createDeadline = async (userId, data) => {
         data.platform,
         data.due_date,
         "UPCOMING",
-        data.notes ?? null
+        data.notes?.trim() || null
     );
 
-    const deadline = await deadlineModel.getContentDeadlineById(
-        result.insertId
-    );
+    const deadline =
+        await deadlineModel.getContentDeadlineByIdAndUserId(
+            result.insertId,
+            userId
+        );
+
+    if (!deadline) {
+        throw new apiError(500, "Unable to retrieve created deadline");
+    }
 
     return {
         ...deadline,
@@ -142,7 +178,7 @@ export const createDeadline = async (userId, data) => {
     };
 };
 
-// Get all deadlines belonging to current user
+// Get all deadlines for the logged-in user
 export const getDeadlines = async (userId) => {
     const deadlines =
         await deadlineModel.getContentDeadlinesByUserId(userId);
@@ -153,8 +189,8 @@ export const getDeadlines = async (userId) => {
     }));
 };
 
-// Get a single deadline belonging to current user
-export const getDeadlineById = async (deadlineId, userId) => {
+// Get one deadline
+export const getDeadlineById = async (userId, deadlineId) => {
     const deadline = await getOwnedDeadline(deadlineId, userId);
 
     return {
@@ -163,8 +199,8 @@ export const getDeadlineById = async (deadlineId, userId) => {
     };
 };
 
-// Update deadline
-export const updateDeadline = async (deadlineId, userId, data) => {
+// Update a deadline
+export const updateDeadline = async (userId, deadlineId, data) => {
     const existing = await getOwnedDeadline(deadlineId, userId);
 
     validateDeadlineData(data, true);
@@ -181,21 +217,28 @@ export const updateDeadline = async (deadlineId, userId, data) => {
 
     const dueDate =
         data.due_date === undefined
-            ? existing.due_date
+            ? formatDate(existing.due_date)
             : data.due_date;
 
     const notes =
         data.notes === undefined
             ? existing.notes
-            : data.notes;
+            : data.notes?.trim() || null;
 
     const currentStatus = deriveStatus(existing);
-    const status = currentStatus === "COMPLETED"
-        ? "COMPLETED"
-        : deriveStatus({ due_date: dueDate, completed_at: null });
+
+    const status =
+        currentStatus === "COMPLETED"
+            ? "COMPLETED"
+            : deriveStatus({
+                due_date: dueDate,
+                completed_at: null,
+                status: "UPCOMING"
+            });
 
     await deadlineModel.updateContentDeadline(
         existing.deadline_id,
+        userId,
         contentTitle,
         platform,
         dueDate,
@@ -203,9 +246,15 @@ export const updateDeadline = async (deadlineId, userId, data) => {
         notes
     );
 
-    const updated = await deadlineModel.getContentDeadlineById(
-        existing.deadline_id
-    );
+    const updated =
+        await deadlineModel.getContentDeadlineByIdAndUserId(
+            existing.deadline_id,
+            userId
+        );
+
+    if (!updated) {
+        throw new apiError(404, "Content deadline not found");
+    }
 
     return {
         ...updated,
@@ -213,8 +262,8 @@ export const updateDeadline = async (deadlineId, userId, data) => {
     };
 };
 
-// Mark deadline as completed
-export const completeDeadline = async (deadlineId, userId) => {
+// Mark a deadline as completed
+export const completeDeadline = async (userId, deadlineId) => {
     const existing = await getOwnedDeadline(deadlineId, userId);
 
     if (existing.completed_at || existing.status === "COMPLETED") {
@@ -226,16 +275,23 @@ export const completeDeadline = async (deadlineId, userId) => {
 
     await deadlineModel.updateContentDeadline(
         existing.deadline_id,
+        userId,
         existing.content_title,
         existing.platform,
-        existing.due_date,
+        formatDate(existing.due_date),
         "COMPLETED",
         existing.notes ?? null
     );
 
-    const updated = await deadlineModel.getContentDeadlineById(
-        existing.deadline_id
-    );
+    const updated =
+        await deadlineModel.getContentDeadlineByIdAndUserId(
+            existing.deadline_id,
+            userId
+        );
+
+    if (!updated) {
+        throw new apiError(404, "Content deadline not found");
+    }
 
     return {
         ...updated,
@@ -243,17 +299,20 @@ export const completeDeadline = async (deadlineId, userId) => {
     };
 };
 
-// Delete deadline
-export const deleteDeadline = async (deadlineId, userId) => {
+// Delete a deadline
+export const deleteDeadline = async (userId, deadlineId) => {
     const deadline = await getOwnedDeadline(deadlineId, userId);
 
     const result = await deadlineModel.deleteContentDeadline(
-        deadline.deadline_id
+        deadline.deadline_id,
+        userId
     );
 
     if (!result.affectedRows) {
         throw new apiError(404, "Content deadline not found");
     }
 
-    return { deadline_id: deadline.deadline_id };
+    return {
+        deadline_id: deadline.deadline_id
+    };
 };

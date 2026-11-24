@@ -1,6 +1,9 @@
+
 import * as productModel from "../models/product.model.js";
 import * as brandModel from "../models/brand.model.js";
 import { apiError } from "../utils/apiError.js";
+
+const MAX_PRODUCT_VALUE = 99999999.99;
 
 const parseId = (value, fieldName = "ID") => {
     const id = String(value ?? "");
@@ -14,6 +17,10 @@ const parseId = (value, fieldName = "ID") => {
 
 const validateProductData = (data, isUpdate = false) => {
     const errors = [];
+
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+        throw new apiError(400, "Invalid product data");
+    }
 
     if (!isUpdate || data.product_name !== undefined) {
         if (
@@ -33,12 +40,14 @@ const validateProductData = (data, isUpdate = false) => {
             data.value === "" ||
             data.value === null ||
             data.value === undefined ||
+            !/^\d+(\.\d{1,2})?$/.test(String(data.value)) ||
             !Number.isFinite(value) ||
-            value < 0
+            value < 0 ||
+            value > MAX_PRODUCT_VALUE
         ) {
-            errors.push("Product value must be a non-negative number");
-        } else if (!/^\d+(\.\d{1,2})?$/.test(String(data.value))) {
-            errors.push("Product value can have at most 2 decimal places");
+            errors.push(
+                "Product value must be between 0 and 99999999.99 with up to 2 decimal places"
+            );
         }
     }
 
@@ -56,14 +65,14 @@ const validateProductData = (data, isUpdate = false) => {
         data.description !== null &&
         typeof data.description !== "string"
     ) {
-        errors.push("Description must be a string");
+        errors.push("Description must be a string or null");
     }
 
     if (
         typeof data.description === "string" &&
-        data.description.length > 5000
+        data.description.length > 1000
     ) {
-        errors.push("Description must not exceed 5000 characters");
+        errors.push("Description must not exceed 1000 characters");
     }
 
     if (errors.length > 0) {
@@ -74,9 +83,12 @@ const validateProductData = (data, isUpdate = false) => {
 const getOwnedProduct = async (productId, userId) => {
     const id = parseId(productId, "product ID");
 
-    const product = await productModel.getProductById(id);
+    const product = await productModel.getProductByIdAndUserId(
+        id,
+        userId
+    );
 
-    if (!product || String(product.user_id) !== String(userId)) {
+    if (!product) {
         throw new apiError(404, "Product not found");
     }
 
@@ -86,9 +98,12 @@ const getOwnedProduct = async (productId, userId) => {
 const verifyOwnedBrand = async (brandId, userId) => {
     const id = parseId(brandId, "brand ID");
 
-    const brand = await brandModel.getBrandById(id);
+    const brand = await brandModel.getBrandByIdAndUserId(
+        id,
+        userId
+    );
 
-    if (!brand || String(brand.user_id) !== String(userId)) {
+    if (!brand) {
         throw new apiError(404, "Brand not found");
     }
 
@@ -97,6 +112,8 @@ const verifyOwnedBrand = async (brandId, userId) => {
 
 // Create product
 export const createProduct = async (userId, data) => {
+    parseId(userId, "user ID");
+
     validateProductData(data);
 
     const brandId = parseId(data.brand_id, "brand ID");
@@ -112,22 +129,34 @@ export const createProduct = async (userId, data) => {
         data.description ?? null
     );
 
-    return productModel.getProductById(result.insertId);
+    return productModel.getProductByIdAndUserId(
+        result.insertId,
+        userId
+    );
 };
 
-// Get all products for current user
+// Get all products belonging to current user
 export const getProducts = async (userId) => {
+    parseId(userId, "user ID");
+
     return productModel.getProductsByUserId(userId);
 };
 
-// Get a single product for current user
+// Get one product belonging to current user
 export const getProductById = async (userId, productId) => {
+    parseId(userId, "user ID");
+
     return getOwnedProduct(productId, userId);
 };
 
 // Update product
 export const updateProduct = async (userId, productId, data) => {
-    const existingProduct = await getOwnedProduct(productId, userId);
+    parseId(userId, "user ID");
+
+    const existingProduct = await getOwnedProduct(
+        productId,
+        userId
+    );
 
     validateProductData(data, true);
 
@@ -151,34 +180,28 @@ export const updateProduct = async (userId, productId, data) => {
             ? existingProduct.description
             : data.description;
 
-    const result = await productModel.updateProduct(
+    await productModel.updateProduct(
         existingProduct.product_id,
+        userId,
         productName,
         value,
         currency,
         description
     );
 
-    if (!result.affectedRows) {
-        const refreshed = await productModel.getProductById(
-            existingProduct.product_id
-        );
-
-        if (!refreshed) {
-            throw new apiError(404, "Product not found");
-        }
-
-        return refreshed;
-    }
-
-    return productModel.getProductById(existingProduct.product_id);
+    return getOwnedProduct(existingProduct.product_id, userId);
 };
 
-// Delete product
+// Delete product belonging to current user
 export const deleteProduct = async (userId, productId) => {
+    parseId(userId, "user ID");
+
     const product = await getOwnedProduct(productId, userId);
 
-    const result = await productModel.deleteProduct(product.product_id);
+    const result = await productModel.deleteProduct(
+        product.product_id,
+        userId
+    );
 
     if (!result.affectedRows) {
         throw new apiError(404, "Product not found");

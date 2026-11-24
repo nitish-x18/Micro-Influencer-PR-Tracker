@@ -30,6 +30,7 @@ const isValidDate = (value) => {
     );
 };
 
+// Validate shipment creation
 export const createShipmentValidator = (body = {}) => {
     const errors = [];
 
@@ -47,7 +48,9 @@ export const createShipmentValidator = (body = {}) => {
     );
 
     if (unknownFields.length > 0) {
-        errors.push(`Unsupported fields: ${unknownFields.join(", ")}`);
+        errors.push(
+            `Unsupported fields: ${unknownFields.join(", ")}`
+        );
     }
 
     if (
@@ -55,8 +58,8 @@ export const createShipmentValidator = (body = {}) => {
         !body.shipment_code.trim()
     ) {
         errors.push("Shipment code is required");
-    } else if (body.shipment_code.trim().length > 255) {
-        errors.push("Shipment code is too long");
+    } else if (body.shipment_code.trim().length > 50) {
+        errors.push("Shipment code cannot exceed 50 characters");
     }
 
     if (!isPositiveId(body.brand_id)) {
@@ -81,27 +84,46 @@ export const createShipmentValidator = (body = {}) => {
     }
 
     if (
+        body.status === "RECEIVED"
+    ) {
+        errors.push(
+            "New shipments must have SHIPPED status"
+        );
+    }
+
+    if (
         body.tracking_reference !== undefined &&
         body.tracking_reference !== null &&
         typeof body.tracking_reference !== "string"
     ) {
         errors.push("Tracking reference must be a string");
+    } else if (
+        typeof body.tracking_reference === "string" &&
+        body.tracking_reference.length > 255
+    ) {
+        errors.push("Tracking reference cannot exceed 255 characters");
     }
 
     return errors;
 };
 
+// Validate shipment status updates
 export const updateShipmentStatusValidator = (body = {}) => {
     const errors = [];
 
-    const allowedFields = ["status", "tracking_reference"];
+    const allowedFields = [
+        "status",
+        "tracking_reference"
+    ];
 
     const unknownFields = Object.keys(body).filter(
         (key) => !allowedFields.includes(key)
     );
 
     if (unknownFields.length > 0) {
-        errors.push(`Unsupported fields: ${unknownFields.join(", ")}`);
+        errors.push(
+            `Unsupported fields: ${unknownFields.join(", ")}`
+        );
     }
 
     if (!SHIPMENT_STATUS_VALUES.includes(body.status)) {
@@ -114,6 +136,11 @@ export const updateShipmentStatusValidator = (body = {}) => {
         typeof body.tracking_reference !== "string"
     ) {
         errors.push("Tracking reference must be a string");
+    } else if (
+        typeof body.tracking_reference === "string" &&
+        body.tracking_reference.length > 255
+    ) {
+        errors.push("Tracking reference cannot exceed 255 characters");
     }
 
     return errors;
