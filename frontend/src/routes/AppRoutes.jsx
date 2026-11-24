@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Landing from "../pages/Landing";
@@ -12,6 +13,7 @@ import Deadlines from "../pages/Deadlines";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import ProtectedRoute from "./ProtectedRoute";
+import { MobileMenuProvider } from "../components/MobileMenuContext";
 
 function DashboardLayout() {
   return (
@@ -30,19 +32,21 @@ function DashboardLayout() {
 function AppRoutes() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+      <MobileMenuProvider>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<DashboardLayout />} />
-          <Route path="/brands" element={<Brands />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/shipments" element={<Shipments />} />
-          <Route path="/deadlines" element={<Deadlines />} />
-        </Route>
-      </Routes>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<DashboardLayout />} />
+            <Route path="/brands" element={<Brands />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/shipments" element={<Shipments />} />
+            <Route path="/deadlines" element={<Deadlines />} />
+          </Route>
+        </Routes>
+      </MobileMenuProvider>
     </BrowserRouter>
   );
 }

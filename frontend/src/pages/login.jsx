@@ -1,3 +1,4 @@
+
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -33,9 +34,7 @@ function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (isSubmitting) {
-      return;
-    }
+    if (isSubmitting) return;
 
     const email = form.email.trim().toLowerCase();
     const password = form.password;
@@ -70,7 +69,7 @@ function Login() {
 
       if (!token) {
         throw new Error(
-          "Login successful, but access token was not received.",
+          "Login successful, but access token was not received."
         );
       }
 
@@ -112,43 +111,47 @@ function Login() {
   const handleForgotPassword = () => {
     setError("");
     setSuccess(
-      "Password reset will be available after the backend email service is connected.",
+      "Password reset will be available after the backend email service is connected."
     );
   };
 
   const handleGoogleLogin = () => {
     setError("");
     setSuccess(
-      "Google sign-in will be available after authentication is connected.",
+      "Google sign-in will be available after authentication is connected."
     );
   };
 
   return (
-    <div className="min-h-screen bg-[#eef8ff]">
-      <div className="flex min-h-screen flex-col">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[#eef8ff]">
+      <div className="flex min-h-screen w-full min-w-0 flex-col">
+
         {/* Header */}
-        <header className="border-b border-slate-200 bg-white">
-          <div className="mx-auto flex h-[72px] w-full max-w-[1400px] items-center justify-between px-6 lg:px-10">
-            <Link to="/" className="flex items-center">
+        <header className="w-full border-b border-slate-200 bg-white">
+          <div className="mx-auto flex h-[72px] w-full max-w-[1400px] min-w-0 items-center justify-between gap-2 px-4 sm:gap-3 sm:px-6 lg:px-10">
+            <Link to="/" className="flex min-w-0 shrink items-center">
               <img
                 src={logo}
                 alt="InfluenceFlow"
-                className="h-12 w-auto object-contain"
+                className="h-10 w-auto max-w-[140px] object-contain sm:h-12 sm:max-w-[160px]"
               />
             </Link>
 
             <Link
               to="/register"
-              className="text-sm font-semibold text-[#17345f] hover:text-cyan-600"
+              className="shrink-0 text-xs font-semibold text-[#17345f] hover:text-cyan-600 sm:text-sm"
             >
               Create account
             </Link>
           </div>
         </header>
 
-        {/* Login */}
-        <main className="flex flex-1 items-center justify-center px-5 py-12">
-          <div className="w-full max-w-[430px] rounded-2xl bg-white p-8 shadow-xl shadow-slate-300/40 sm:p-10">
+        {/* Login Section */}
+        <main className="flex w-full min-w-0 flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
+
+          {/* Login Card */}
+          <div className="box-border mx-auto w-full min-w-0 max-w-[430px] rounded-2xl bg-white p-5 shadow-xl shadow-slate-300/40 min-[380px]:p-6 sm:p-10">
+
             {/* Heading */}
             <div className="text-center">
               <div className="text-[24px] font-extrabold tracking-tight text-[#12336d]">
@@ -169,29 +172,33 @@ function Login() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            <form
+              onSubmit={handleSubmit}
+              className="mt-8 w-full min-w-0 space-y-5"
+            >
+
               {/* Error */}
               {error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                <div className="w-full min-w-0 break-words rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                   {error}
                 </div>
               )}
 
               {/* Success */}
               {success && (
-                <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-600">
+                <div className="w-full min-w-0 break-words rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-600">
                   {success}
                 </div>
               )}
 
               {/* Email */}
-              <div>
+              <div className="w-full min-w-0">
                 <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Email
                 </label>
 
-                <div className="flex h-12 items-center rounded-lg border border-slate-300 bg-white px-3 transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
-                  <Mail size={17} className="text-slate-400" />
+                <div className="flex h-12 w-full min-w-0 items-center rounded-lg border border-slate-300 bg-white px-3 transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
+                  <Mail size={17} className="shrink-0 text-slate-400" />
 
                   <input
                     name="email"
@@ -200,19 +207,22 @@ function Login() {
                     onChange={handleChange}
                     placeholder="creator@example.com"
                     autoComplete="email"
-                    className="ml-2 w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+                    className="ml-2 min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
                   />
                 </div>
               </div>
 
               {/* Password */}
-              <div>
+              <div className="w-full min-w-0">
                 <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Password
                 </label>
 
-                <div className="flex h-12 items-center rounded-lg border border-slate-300 bg-white px-3 transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
-                  <LockKeyhole size={17} className="text-slate-400" />
+                <div className="flex h-12 w-full min-w-0 items-center rounded-lg border border-slate-300 bg-white px-3 transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
+                  <LockKeyhole
+                    size={17}
+                    className="shrink-0 text-slate-400"
+                  />
 
                   <input
                     name="password"
@@ -221,31 +231,35 @@ function Login() {
                     onChange={handleChange}
                     placeholder="••••••••••"
                     autoComplete="current-password"
-                    className="ml-2 w-full bg-transparent text-sm text-slate-800 outline-none"
+                    className="ml-2 min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none"
                   />
 
                   <button
                     type="button"
                     onClick={() => setShowPassword((value) => !value)}
-                    className="text-slate-400 hover:text-slate-600"
+                    className="shrink-0 p-1 text-slate-400 hover:text-slate-600"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
                   >
-                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                    {showPassword ? (
+                      <EyeOff size={17} />
+                    ) : (
+                      <Eye size={17} />
+                    )}
                   </button>
                 </div>
               </div>
 
               {/* Options */}
-              <div className="flex flex-col gap-3 text-xs sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex w-full min-w-0 flex-col gap-3 text-xs sm:flex-row sm:items-center sm:justify-between">
                 <label className="flex cursor-pointer items-center gap-2 text-slate-500">
                   <input
                     name="remember"
                     type="checkbox"
                     checked={form.remember}
                     onChange={handleChange}
-                    className="h-4 w-4 rounded border-slate-300"
+                    className="h-4 w-4 shrink-0 rounded border-slate-300"
                   />
                   Keep me signed in
                 </label>
@@ -253,13 +267,13 @@ function Login() {
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="font-semibold text-blue-600 hover:underline"
+                  className="self-start font-semibold text-blue-600 hover:underline sm:self-auto"
                 >
                   Forgot password?
                 </button>
               </div>
 
-              {/* Sign in */}
+              {/* Sign In */}
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -275,7 +289,7 @@ function Login() {
               </button>
 
               {/* Divider */}
-              <div className="flex items-center gap-3">
+              <div className="flex w-full items-center gap-3">
                 <div className="h-px flex-1 bg-slate-200" />
 
                 <span className="text-xs text-slate-400">or</span>
@@ -308,8 +322,8 @@ function Login() {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-slate-200 bg-white">
-          <div className="mx-auto max-w-[1400px] px-6 py-4 text-xs text-slate-500 lg:px-10">
+        <footer className="w-full border-t border-slate-200 bg-white">
+          <div className="mx-auto w-full max-w-[1400px] px-4 py-4 text-xs text-slate-500 sm:px-6 lg:px-10">
             InfluenceFlow · PR Tracker
           </div>
         </footer>

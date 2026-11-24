@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
+import MobileMenuButton from "../components/MobileMenuButton";
 import { brandService } from "../services/brandService";
 import { productService } from "../services/productService";
 import { shipmentService } from "../services/shipmentService";
@@ -236,8 +237,12 @@ export default function Shipments() {
       <Sidebar />
 
       <main className="min-w-0 flex-1">
+        {/* Page Header */}
         <header className="flex h-[72px] items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-7">
-          <h1 className="text-xl font-extrabold">Shipments</h1>
+          <div className="flex min-w-0 items-center gap-3">
+            <MobileMenuButton />
+            <h1 className="text-xl font-extrabold">Shipments</h1>
+          </div>
 
           <div className="flex items-center gap-3 sm:gap-5">
             <span className="rounded-full p-2 text-slate-600">
@@ -286,6 +291,7 @@ export default function Shipments() {
             </div>
           )}
 
+          {/* Status Filters */}
           <div className="mb-5 flex flex-wrap items-center gap-2">
             {[
               { label: "All", value: "ALL" },
@@ -307,6 +313,7 @@ export default function Shipments() {
             ))}
           </div>
 
+          {/* Search */}
           <label className="mb-5 flex h-10 w-full max-w-sm items-center gap-2 rounded-md border border-slate-300 bg-white px-3 focus-within:border-blue-500">
             <Search size={17} className="shrink-0 text-slate-500" />
             <input
@@ -319,6 +326,7 @@ export default function Shipments() {
           </label>
 
           <div className="grid min-w-0 grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.9fr)]">
+            {/* Shipment List */}
             <section className="min-w-0 space-y-3">
               {loading ? (
                 <div className="flex min-h-[260px] items-center justify-center rounded-xl border bg-white text-sm text-slate-500">
@@ -378,7 +386,11 @@ export default function Shipments() {
                               : "bg-[#fff0df] text-[#c56b1c]"
                           }`}
                         >
-                          {isReceived ? <Check size={14} /> : <Truck size={14} />}
+                          {isReceived ? (
+                            <Check size={14} />
+                          ) : (
+                            <Truck size={14} />
+                          )}
                           {shipment.status}
                         </span>
 
@@ -402,12 +414,15 @@ export default function Shipments() {
               )}
             </section>
 
+            {/* Shipment Details */}
             <aside className="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               {selectedShipment ? (
                 <>
                   <div className="mb-5 flex items-center justify-between gap-3">
                     <h3 className="text-lg font-extrabold">
-                      {showConfirmation ? "Confirm change" : "Shipment details"}
+                      {showConfirmation
+                        ? "Confirm change"
+                        : "Shipment details"}
                     </h3>
 
                     <button
@@ -457,11 +472,26 @@ export default function Shipments() {
                     </>
                   ) : (
                     <div className="space-y-4 text-sm">
-                      <DetailItem label="Shipment code" value={getShipmentCode(selectedShipment)} />
-                      <DetailItem label="Product" value={getProductName(selectedShipment)} />
-                      <DetailItem label="Brand" value={getBrandName(selectedShipment)} />
-                      <DetailItem label="Tracking information" value={getTracking(selectedShipment)} />
-                      <DetailItem label="Shipped date" value={getShipmentDate(selectedShipment)} />
+                      <DetailItem
+                        label="Shipment code"
+                        value={getShipmentCode(selectedShipment)}
+                      />
+                      <DetailItem
+                        label="Product"
+                        value={getProductName(selectedShipment)}
+                      />
+                      <DetailItem
+                        label="Brand"
+                        value={getBrandName(selectedShipment)}
+                      />
+                      <DetailItem
+                        label="Tracking information"
+                        value={getTracking(selectedShipment)}
+                      />
+                      <DetailItem
+                        label="Shipped date"
+                        value={getShipmentDate(selectedShipment)}
+                      />
 
                       <div>
                         <p className="mb-1 text-xs font-semibold uppercase text-slate-400">
@@ -507,6 +537,7 @@ export default function Shipments() {
         </div>
       </main>
 
+      {/* New Shipment Modal */}
       {showForm && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-[#071827]/50 p-4"

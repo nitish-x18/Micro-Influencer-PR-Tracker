@@ -58,7 +58,7 @@ function DeadlineRow({ deadline, overdue = false }) {
   );
 
   return (
-    <div className="flex items-center gap-4 border-b border-slate-200 py-3 last:border-b-0">
+    <div className="flex flex-wrap items-center gap-3 border-b border-slate-200 py-3 last:border-b-0 sm:flex-nowrap sm:gap-4">
       <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg bg-slate-100">
         <span className="text-lg font-extrabold leading-none text-slate-900">
           {date.day}
@@ -187,7 +187,7 @@ function Dashboard() {
 
   return (
     <main className="min-h-full bg-[#f6f8fa] p-5 lg:p-6">
-      <div className="mb-5 flex items-center justify-between gap-3">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900">Dashboard</h1>
           <p className="mt-1 text-sm text-slate-500">

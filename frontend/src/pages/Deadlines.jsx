@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
+import MobileMenuButton from "../components/MobileMenuButton";
 
 import { shipmentService } from "../services/shipmentService";
 import { deadlineService } from "../services/deadlineService";
@@ -359,9 +360,13 @@ export default function Deadlines() {
 
         {/* Header */}
         <header className="flex h-[72px] items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-7">
-          <h1 className="text-xl font-extrabold">
-            Content Deadlines
-          </h1>
+          <div className="flex items-center gap-3">
+            <MobileMenuButton />
+
+            <h1 className="text-xl font-extrabold">
+              Content Deadlines
+            </h1>
+          </div>
 
           <div className="flex items-center gap-3 sm:gap-5">
             <button

@@ -1,4 +1,12 @@
-import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, User } from "lucide-react";
+
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  Mail,
+  User,
+} from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/influenceflow-logo.png";
@@ -60,7 +68,7 @@ function Register() {
       !/[!@#$%^&*]/.test(password)
     ) {
       setError(
-        "Password must have at least 8 characters, a number and a symbol.",
+        "Password must have at least 8 characters, a number and a symbol."
       );
       return;
     }
@@ -105,36 +113,40 @@ function Register() {
   const handleGoogleSignup = () => {
     setError("");
     setSuccess(
-      "Google sign-up will be available after authentication is connected.",
+      "Google sign-up will be available after authentication is connected."
     );
   };
 
   return (
-    <div className="min-h-screen bg-[#eef8ff]">
-      <div className="flex min-h-screen flex-col">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[#eef8ff]">
+      <div className="flex min-h-screen w-full min-w-0 flex-col">
+
         {/* Header */}
-        <header className="border-b border-slate-200 bg-white">
-          <div className="mx-auto flex h-[72px] w-full max-w-[1400px] items-center justify-between px-4 sm:px-6 lg:px-10">
-            <Link to="/" className="flex items-center">
+        <header className="w-full border-b border-slate-200 bg-white">
+          <div className="mx-auto flex h-[72px] w-full max-w-[1400px] min-w-0 items-center justify-between gap-2 px-4 sm:gap-3 sm:px-6 lg:px-10">
+            <Link to="/" className="flex min-w-0 shrink items-center">
               <img
                 src={logo}
                 alt="InfluenceFlow"
-                className="h-12 w-auto object-contain"
+                className="h-10 w-auto max-w-[140px] object-contain sm:h-12 sm:max-w-[160px]"
               />
             </Link>
 
             <Link
               to="/login"
-              className="text-sm font-semibold text-[#17345f] hover:text-cyan-600"
+              className="shrink-0 text-xs font-semibold text-[#17345f] hover:text-cyan-600 sm:text-sm"
             >
               Sign in
             </Link>
           </div>
         </header>
 
-        {/* Register */}
-        <main className="flex flex-1 items-center justify-center px-4 py-8 sm:px-5 sm:py-10">
-          <div className="w-full max-w-[460px] rounded-2xl bg-white p-6 shadow-xl shadow-slate-300/40 sm:p-10">
+        {/* Register Section */}
+        <main className="flex w-full min-w-0 flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-10">
+
+          {/* Register Card */}
+          <div className="box-border mx-auto w-full min-w-0 max-w-[460px] rounded-2xl bg-white p-5 shadow-xl shadow-slate-300/40 min-[380px]:p-6 sm:p-10">
+
             {/* Heading */}
             <div className="text-center">
               <div className="text-[24px] font-extrabold tracking-tight text-[#12336d]">
@@ -154,29 +166,33 @@ function Register() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+            <form
+              onSubmit={handleSubmit}
+              className="mt-7 w-full min-w-0 space-y-4"
+            >
+
               {/* Error */}
               {error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                <div className="w-full min-w-0 break-words rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                   {error}
                 </div>
               )}
 
               {/* Success */}
               {success && (
-                <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-600">
+                <div className="w-full min-w-0 break-words rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-600">
                   {success}
                 </div>
               )}
 
-              {/* Full name */}
-              <div>
+              {/* Full Name */}
+              <div className="w-full min-w-0">
                 <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Full name
                 </label>
 
-                <div className="flex h-12 items-center rounded-lg border border-slate-300 px-3 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
-                  <User size={17} className="text-slate-400" />
+                <div className="flex h-12 w-full min-w-0 items-center rounded-lg border border-slate-300 px-3 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
+                  <User size={17} className="shrink-0 text-slate-400" />
 
                   <input
                     name="fullName"
@@ -185,19 +201,19 @@ function Register() {
                     onChange={handleChange}
                     placeholder="Your full name"
                     autoComplete="name"
-                    className="ml-2 w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
+                    className="ml-2 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
                   />
                 </div>
               </div>
 
               {/* Email */}
-              <div>
+              <div className="w-full min-w-0">
                 <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Email
                 </label>
 
-                <div className="flex h-12 items-center rounded-lg border border-slate-300 px-3 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
-                  <Mail size={17} className="text-slate-400" />
+                <div className="flex h-12 w-full min-w-0 items-center rounded-lg border border-slate-300 px-3 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
+                  <Mail size={17} className="shrink-0 text-slate-400" />
 
                   <input
                     name="email"
@@ -206,19 +222,22 @@ function Register() {
                     onChange={handleChange}
                     placeholder="creator@example.com"
                     autoComplete="email"
-                    className="ml-2 w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
+                    className="ml-2 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
                   />
                 </div>
               </div>
 
               {/* Password */}
-              <div>
+              <div className="w-full min-w-0">
                 <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Password
                 </label>
 
-                <div className="flex h-12 items-center rounded-lg border border-slate-300 px-3 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
-                  <LockKeyhole size={17} className="text-slate-400" />
+                <div className="flex h-12 w-full min-w-0 items-center rounded-lg border border-slate-300 px-3 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
+                  <LockKeyhole
+                    size={17}
+                    className="shrink-0 text-slate-400"
+                  />
 
                   <input
                     name="password"
@@ -227,34 +246,41 @@ function Register() {
                     onChange={handleChange}
                     placeholder="Create a password"
                     autoComplete="new-password"
-                    className="ml-2 w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
+                    className="ml-2 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
                   />
 
                   <button
                     type="button"
                     onClick={() => setShowPassword((value) => !value)}
-                    className="text-slate-400 hover:text-slate-600"
+                    className="shrink-0 p-1 text-slate-400 hover:text-slate-600"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
                   >
-                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                    {showPassword ? (
+                      <EyeOff size={17} />
+                    ) : (
+                      <Eye size={17} />
+                    )}
                   </button>
                 </div>
 
-                <p className="mt-1.5 text-[11px] text-slate-400">
+                <p className="mt-1.5 text-[11px] leading-relaxed text-slate-400">
                   Use at least 8 characters with a number and a symbol.
                 </p>
               </div>
 
-              {/* Confirm password */}
-              <div>
+              {/* Confirm Password */}
+              <div className="w-full min-w-0">
                 <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Confirm password
                 </label>
 
-                <div className="flex h-12 items-center rounded-lg border border-slate-300 px-3 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
-                  <LockKeyhole size={17} className="text-slate-400" />
+                <div className="flex h-12 w-full min-w-0 items-center rounded-lg border border-slate-300 px-3 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
+                  <LockKeyhole
+                    size={17}
+                    className="shrink-0 text-slate-400"
+                  />
 
                   <input
                     name="confirmPassword"
@@ -263,13 +289,15 @@ function Register() {
                     onChange={handleChange}
                     placeholder="Confirm your password"
                     autoComplete="new-password"
-                    className="ml-2 w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
+                    className="ml-2 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
                   />
 
                   <button
                     type="button"
-                    onClick={() => setShowConfirmPassword((value) => !value)}
-                    className="text-slate-400 hover:text-slate-600"
+                    onClick={() =>
+                      setShowConfirmPassword((value) => !value)
+                    }
+                    className="shrink-0 p-1 text-slate-400 hover:text-slate-600"
                     aria-label={
                       showConfirmPassword
                         ? "Hide confirm password"
@@ -286,18 +314,19 @@ function Register() {
               </div>
 
               {/* Terms */}
-              <label className="flex cursor-pointer items-start gap-2 pt-1 text-xs leading-5 text-slate-500">
+              <label className="flex min-w-0 cursor-pointer items-start gap-2 pt-1 text-xs leading-5 text-slate-500">
                 <input
                   name="terms"
                   type="checkbox"
                   checked={form.terms}
                   onChange={handleChange}
-                  className="mt-1 h-4 w-4 rounded border-slate-300"
+                  className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300"
                 />
 
-                <span>
+                <span className="min-w-0">
                   I agree to the{" "}
-                  <span className="font-semibold text-blue-600">Terms</span> and{" "}
+                  <span className="font-semibold text-blue-600">Terms</span>{" "}
+                  and{" "}
                   <span className="font-semibold text-blue-600">
                     Privacy Policy
                   </span>
@@ -305,7 +334,7 @@ function Register() {
                 </span>
               </label>
 
-              {/* Create account */}
+              {/* Create Account */}
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -321,7 +350,7 @@ function Register() {
               </button>
 
               {/* Divider */}
-              <div className="flex items-center gap-3">
+              <div className="flex w-full items-center gap-3">
                 <div className="h-px flex-1 bg-slate-200" />
 
                 <span className="text-xs text-slate-400">or</span>
@@ -354,8 +383,8 @@ function Register() {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-slate-200 bg-white">
-          <div className="mx-auto max-w-[1400px] px-6 py-4 text-xs text-slate-500 lg:px-10">
+        <footer className="w-full border-t border-slate-200 bg-white">
+          <div className="mx-auto w-full max-w-[1400px] px-4 py-4 text-xs text-slate-500 sm:px-6 lg:px-10">
             InfluenceFlow · PR Tracker
           </div>
         </footer>

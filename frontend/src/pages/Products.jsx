@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
+import MobileMenuButton from "../components/MobileMenuButton";
 import { brandService } from "../services/brandService";
 import { productService } from "../services/productService";
 
@@ -257,9 +258,12 @@ export default function Products() {
       <Sidebar />
 
       <main className="min-w-0 flex-1">
-        {/* Page header - same as Shipments and Brands */}
+        {/* Page Header */}
         <header className="flex h-[72px] items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-7">
-          <h1 className="text-xl font-extrabold">Products</h1>
+          <div className="flex min-w-0 items-center gap-3">
+            <MobileMenuButton />
+            <h1 className="text-xl font-extrabold">Products</h1>
+          </div>
 
           <div className="flex items-center gap-3 sm:gap-5">
             <span className="rounded-full p-2 text-slate-600">
@@ -278,6 +282,7 @@ export default function Products() {
 
         <div className="p-4 sm:p-6">
           <section className="min-w-0">
+            {/* Statistics Cards */}
             <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
               <StatCard
                 label="Products"
@@ -303,6 +308,7 @@ export default function Products() {
               </div>
             </div>
 
+            {/* Search, Filters and Add Product */}
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <label className="flex h-10 w-full min-w-0 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 shadow-sm focus-within:border-blue-500 sm:w-[180px]">
                 <Search size={18} className="shrink-0 text-slate-600" />
@@ -337,6 +343,7 @@ export default function Products() {
                 />
               </div>
 
+              {/* Sort Dropdown */}
               <div className="relative z-30 min-w-0 flex-1 sm:flex-none">
                 <button
                   type="button"
@@ -402,6 +409,7 @@ export default function Products() {
               </p>
             )}
 
+            {/* Products Table */}
             <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
               <div className="max-h-[520px] overflow-auto overscroll-x-contain rounded-lg">
                 <table className="w-full min-w-[650px] border-collapse text-left text-sm">
@@ -538,6 +546,7 @@ export default function Products() {
             </div>
           </section>
 
+          {/* Add / Edit Product Modal */}
           {isAddFormOpen && (
             <div
               className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
