@@ -2,8 +2,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Landing from "../pages/Landing";
-import Login from "../pages/Login";
-import Register from "../pages/Register";
+import Login from "../pages/login";
+import Register from "../pages/register";
 import Dashboard from "../pages/Dashboard";
 import Brands from "../pages/Brands";
 import Products from "../pages/Products";
@@ -11,7 +11,7 @@ import Shipments from "../pages/Shipments";
 import Deadlines from "../pages/Deadlines";
 
 import Sidebar from "../components/Sidebar";
-import Topbar from "../components/Topbar";
+import Topbar from "../components/topbar";
 import ProtectedRoute from "./ProtectedRoute";
 import { MobileMenuProvider } from "../components/MobileMenuContext";
 
