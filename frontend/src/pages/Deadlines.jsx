@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/sidebar";
 import MobileMenuButton from "../components/MobileMenuButton";
 
 import { shipmentService } from "../services/shipmentService";
