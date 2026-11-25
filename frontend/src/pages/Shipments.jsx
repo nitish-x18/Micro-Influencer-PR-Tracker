@@ -12,7 +12,7 @@ import {
   LoaderCircle,
 } from "lucide-react";
 
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/sidebar";
 import MobileMenuButton from "../components/MobileMenuButton";
 import { brandService } from "../services/brandService";
 import { productService } from "../services/productService";

@@ -10,7 +10,7 @@ import Products from "../pages/Products";
 import Shipments from "../pages/Shipments";
 import Deadlines from "../pages/Deadlines";
 
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/sidebar";
 import Topbar from "../components/topbar";
 import ProtectedRoute from "./ProtectedRoute";
 import { MobileMenuProvider } from "../components/MobileMenuContext";
