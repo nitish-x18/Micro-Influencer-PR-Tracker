@@ -14,7 +14,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/sidebar.jsx";
 import { brandService } from "../services/brandService";
 
 const formatCurrency = (value) =>

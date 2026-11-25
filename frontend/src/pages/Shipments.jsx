@@ -12,7 +12,7 @@ import {
   LoaderCircle,
 } from "lucide-react";
 
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/sidebar.jsx";
 import { brandService } from "../services/brandService";
 import { productService } from "../services/productService";
 import { shipmentService } from "../services/shipmentService";
@@ -71,6 +71,8 @@ export default function Shipments() {
 
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
+
+
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("ALL");

@@ -11,7 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/sidebar.jsx";
 import { brandService } from "../services/brandService";
 import { productService } from "../services/productService";
 
