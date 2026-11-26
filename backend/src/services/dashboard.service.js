@@ -40,7 +40,7 @@ const getTodayDate = () => {
 const isCompleted = (deadline) => {
     return (
         deadline.status === "COMPLETED" ||
-        deadline.completed_at !== null
+        Boolean(deadline.completed_at)
     );
 };
 

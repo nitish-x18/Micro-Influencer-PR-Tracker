@@ -1,4 +1,3 @@
-
 import * as shipmentModel from "../models/shipment.model.js";
 import * as productModel from "../models/product.model.js";
 import * as brandModel from "../models/brand.model.js";
@@ -16,6 +15,31 @@ const parseId = (value, fieldName = "ID") => {
     return id;
 };
 
+// Validate shipment date in YYYY-MM-DD format
+const validateShipmentDate = (value) => {
+    if (
+        typeof value !== "string" ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(value)
+    ) {
+        throw new apiError(
+            400,
+            "Shipment date must use YYYY-MM-DD format"
+        );
+    }
+
+    const date = new Date(`${value}T00:00:00Z`);
+
+    if (
+        Number.isNaN(date.getTime()) ||
+        date.toISOString().slice(0, 10) !== value
+    ) {
+        throw new apiError(400, "Invalid shipment date");
+    }
+
+    return value;
+};
+
+// Get shipment only if it belongs to the logged-in user
 const getOwnedShipment = async (shipmentId, userId) => {
     const id = parseId(shipmentId, "shipment ID");
 
@@ -34,6 +58,10 @@ const getOwnedShipment = async (shipmentId, userId) => {
 // Create shipment
 export const createShipment = async (userId, data) => {
     parseId(userId, "user ID");
+
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+        throw new apiError(400, "Invalid shipment data");
+    }
 
     const {
         shipment_code,
@@ -63,9 +91,7 @@ export const createShipment = async (userId, data) => {
         );
     }
 
-    if (!shipment_date) {
-        throw new apiError(400, "Shipment date is required");
-    }
+    validateShipmentDate(shipment_date);
 
     if (!ALLOWED_STATUSES.includes(status)) {
         throw new apiError(400, "Invalid shipment status");
@@ -122,15 +148,29 @@ export const createShipment = async (userId, data) => {
         );
     }
 
-    const result = await shipmentModel.createShipment(
-        userId,
-        shipmentCode,
-        brand_id,
-        product_id,
-        shipment_date,
-        status,
-        tracking_reference
-    );
+    let result;
+
+    try {
+        result = await shipmentModel.createShipment(
+            userId,
+            shipmentCode,
+            brand_id,
+            product_id,
+            shipment_date,
+            status,
+            tracking_reference
+        );
+    } catch (error) {
+        // Handle duplicate shipment constraints
+        if (error.code === "ER_DUP_ENTRY" || error.errno === 1062) {
+            throw new apiError(
+                409,
+                "Shipment code already exists or this product already has a shipment"
+            );
+        }
+
+        throw error;
+    }
 
     return {
         shipment_id: result.insertId,
@@ -164,12 +204,17 @@ export const updateShipmentStatus = async (
 ) => {
     const shipment = await getOwnedShipment(shipmentId, userId);
 
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+        throw new apiError(400, "Invalid shipment update data");
+    }
+
     const { status, tracking_reference } = data;
 
     if (!ALLOWED_STATUSES.includes(status)) {
         throw new apiError(400, "Invalid shipment status");
     }
 
+    // Prevent reverting a received shipment
     if (
         shipment.status === "RECEIVED" &&
         status === "SHIPPED"
@@ -180,6 +225,7 @@ export const updateShipmentStatus = async (
         );
     }
 
+    // Validate tracking reference
     if (
         tracking_reference !== undefined &&
         tracking_reference !== null &&
@@ -191,15 +237,47 @@ export const updateShipmentStatus = async (
         );
     }
 
-    const receivedAt = status === "RECEIVED"
-        ? (shipment.received_at || new Date())
-        : null;
+    // Prevent invalid status transitions
+    if (shipment.status === status) {
+        throw new apiError(
+            400,
+            "Shipment already has this status"
+        );
+    }
+
+    // Validate stored shipment date
+    const shipmentDate = validateShipmentDate(
+        typeof shipment.shipment_date === "string"
+            ? shipment.shipment_date.slice(0, 10)
+            : new Date(shipment.shipment_date)
+                .toISOString()
+                .slice(0, 10)
+    );
+
+    // Set received timestamp when marking as received
+    const receivedAt =
+        status === "RECEIVED"
+            ? (shipment.received_at || new Date())
+            : null;
+
+    // Prevent receiving shipment before its shipment date
+    if (
+        status === "RECEIVED" &&
+        new Date(`${shipmentDate}T00:00:00Z`) > receivedAt
+    ) {
+        throw new apiError(
+            400,
+            "Shipment cannot be received before its shipment date"
+        );
+    }
 
     await shipmentModel.updateShipmentStatus(
         shipment.shipment_id,
         userId,
         status,
-        tracking_reference ?? shipment.tracking_reference ?? null,
+        tracking_reference ??
+            shipment.tracking_reference ??
+            null,
         receivedAt
     );
 
@@ -209,12 +287,14 @@ export const updateShipmentStatus = async (
     );
 };
 
-
 // Delete shipment belonging to the current user
 export const deleteShipment = async (shipmentId, userId) => {
     parseId(userId, "user ID");
 
-    const shipment = await getOwnedShipment(shipmentId, userId);
+    const shipment = await getOwnedShipment(
+        shipmentId,
+        userId
+    );
 
     const result = await shipmentModel.deleteShipment(
         shipment.shipment_id,

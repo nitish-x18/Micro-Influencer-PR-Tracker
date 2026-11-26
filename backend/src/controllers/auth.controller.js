@@ -37,7 +37,11 @@ export const login = asyncHandler(async (req, res) => {
     setAuthCookie(res, result.accessToken);
 
     return res.status(200).json(
-        new apiResponse(200, result, "Login successful")
+        new apiResponse(
+            200,
+            result,
+            "Login successful"
+        )
     );
 });
 
@@ -55,7 +59,11 @@ export const logout = asyncHandler(async (req, res) => {
     });
 
     return res.status(200).json(
-        new apiResponse(200, null, "Logout successful")
+        new apiResponse(
+            200,
+            null,
+            "Logout successful"
+        )
     );
 });
 

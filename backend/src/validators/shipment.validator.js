@@ -11,7 +11,7 @@ const isPositiveId = (value) => {
 
     const id = String(value);
 
-    return /^\d+$/.test(id) && BigInt(id) > 0n;
+    return /^[1-9]\d*$/.test(id);
 };
 
 const isValidDate = (value) => {
@@ -33,6 +33,14 @@ const isValidDate = (value) => {
 // Validate shipment creation
 export const createShipmentValidator = (body = {}) => {
     const errors = [];
+
+    if (
+        !body ||
+        typeof body !== "object" ||
+        Array.isArray(body)
+    ) {
+        return ["Request body must be a valid object"];
+    }
 
     const allowedFields = [
         "shipment_code",
@@ -83,9 +91,7 @@ export const createShipmentValidator = (body = {}) => {
         errors.push("Invalid shipment status");
     }
 
-    if (
-        body.status === "RECEIVED"
-    ) {
+    if (body.status === "RECEIVED") {
         errors.push(
             "New shipments must have SHIPPED status"
         );
@@ -101,7 +107,9 @@ export const createShipmentValidator = (body = {}) => {
         typeof body.tracking_reference === "string" &&
         body.tracking_reference.length > 255
     ) {
-        errors.push("Tracking reference cannot exceed 255 characters");
+        errors.push(
+            "Tracking reference cannot exceed 255 characters"
+        );
     }
 
     return errors;
@@ -110,6 +118,14 @@ export const createShipmentValidator = (body = {}) => {
 // Validate shipment status updates
 export const updateShipmentStatusValidator = (body = {}) => {
     const errors = [];
+
+    if (
+        !body ||
+        typeof body !== "object" ||
+        Array.isArray(body)
+    ) {
+        return ["Request body must be a valid object"];
+    }
 
     const allowedFields = [
         "status",
@@ -140,7 +156,9 @@ export const updateShipmentStatusValidator = (body = {}) => {
         typeof body.tracking_reference === "string" &&
         body.tracking_reference.length > 255
     ) {
-        errors.push("Tracking reference cannot exceed 255 characters");
+        errors.push(
+            "Tracking reference cannot exceed 255 characters"
+        );
     }
 
     return errors;
