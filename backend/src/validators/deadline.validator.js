@@ -45,6 +45,24 @@ const validateNotes = (notes, errors) => {
     }
 };
 
+const validateContentTitle = (contentTitle, errors) => {
+    if (
+        contentTitle !== undefined &&
+        contentTitle !== null &&
+        typeof contentTitle !== "string"
+    ) {
+        errors.push("Content title must be a string or null");
+        return;
+    }
+
+    if (
+        typeof contentTitle === "string" &&
+        contentTitle.trim().length > 255
+    ) {
+        errors.push("Content title must not exceed 255 characters");
+    }
+};
+
 const validateDeadlineFields = (body, errors, partial = false) => {
     const allowedFields = [
         ...(partial ? [] : ["shipment_id"]),
@@ -59,7 +77,9 @@ const validateDeadlineFields = (body, errors, partial = false) => {
     );
 
     if (unknownFields.length > 0) {
-        errors.push(`Unsupported fields: ${unknownFields.join(", ")}`);
+        errors.push(
+            `Unsupported fields: ${unknownFields.join(", ")}`
+        );
     }
 
     if (!partial || "shipment_id" in body) {
@@ -69,14 +89,7 @@ const validateDeadlineFields = (body, errors, partial = false) => {
     }
 
     if (!partial || "content_title" in body) {
-        if (
-            typeof body.content_title !== "string" ||
-            !body.content_title.trim()
-        ) {
-            errors.push("Content title is required");
-        } else if (body.content_title.trim().length > 255) {
-            errors.push("Content title must not exceed 255 characters");
-        }
+        validateContentTitle(body.content_title, errors);
     }
 
     if (!partial || "platform" in body) {
@@ -87,7 +100,9 @@ const validateDeadlineFields = (body, errors, partial = false) => {
 
     if (!partial || "due_date" in body) {
         if (!isValidDate(body.due_date)) {
-            errors.push("Due date must be a valid date in YYYY-MM-DD format");
+            errors.push(
+                "Due date must be a valid date in YYYY-MM-DD format"
+            );
         }
     }
 
@@ -98,6 +113,14 @@ const validateDeadlineFields = (body, errors, partial = false) => {
 
 export const createDeadlineValidator = (body = {}) => {
     const errors = [];
+
+    if (
+        !body ||
+        typeof body !== "object" ||
+        Array.isArray(body)
+    ) {
+        return ["Request body must be a valid object"];
+    }
 
     validateDeadlineFields(body, errors);
 
@@ -131,7 +154,9 @@ export const completeDeadlineValidator = (body = {}) => {
         Array.isArray(body) ||
         Object.keys(body).length > 0
     ) {
-        errors.push("This endpoint does not accept request body fields");
+        errors.push(
+            "This endpoint does not accept request body fields"
+        );
     }
 
     return errors;

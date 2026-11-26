@@ -1,4 +1,3 @@
-
 import * as deadlineModel from "../models/contentDeadline.model.js";
 import * as shipmentModel from "../models/shipment.model.js";
 import { apiError } from "../utils/apiError.js";
@@ -50,7 +49,10 @@ const getOwnedDeadline = async (deadlineId, userId) => {
     const id = parseId(deadlineId, "deadline ID");
 
     const deadline =
-        await deadlineModel.getContentDeadlineByIdAndUserId(id, userId);
+        await deadlineModel.getContentDeadlineByIdAndUserId(
+            id,
+            userId
+        );
 
     if (!deadline) {
         throw new apiError(404, "Content deadline not found");
@@ -63,7 +65,10 @@ const getOwnedDeadline = async (deadlineId, userId) => {
 const verifyOwnedShipment = async (shipmentId, userId) => {
     const id = parseId(shipmentId, "shipment ID");
 
-    const shipment = await shipmentModel.getShipmentById(id, userId);
+    const shipment = await shipmentModel.getShipmentById(
+        id,
+        userId
+    );
 
     if (!shipment) {
         throw new apiError(404, "Shipment not found");
@@ -80,12 +85,10 @@ const validateDeadlineData = (data, isUpdate = false) => {
         throw new apiError(400, "Invalid content deadline data");
     }
 
-    if (!isUpdate || data.content_title !== undefined) {
-        if (
-            typeof data.content_title !== "string" ||
-            !data.content_title.trim()
-        ) {
-            errors.push("Content title is required");
+    // Content title is nullable according to the database schema
+    if (data.content_title !== undefined && data.content_title !== null) {
+        if (typeof data.content_title !== "string") {
+            errors.push("Content title must be a string or null");
         } else if (data.content_title.trim().length > 255) {
             errors.push("Content title must not exceed 255 characters");
         }
@@ -146,20 +149,35 @@ const deriveStatus = (deadline) => {
 
 // Create a deadline
 export const createDeadline = async (userId, data) => {
+    parseId(userId, "user ID");
+
     validateDeadlineData(data);
 
     const shipmentId = parseId(data.shipment_id, "shipment ID");
 
     await verifyOwnedShipment(shipmentId, userId);
 
+    const contentTitle =
+        typeof data.content_title === "string"
+            ? data.content_title.trim() || null
+            : null;
+
+    const notes = data.notes?.trim() || null;
+
+    // Determine status before insertion
+    const status = deriveStatus({
+        due_date: data.due_date,
+        completed_at: null
+    });
+
     const result = await deadlineModel.createContentDeadline(
         userId,
         shipmentId,
-        data.content_title.trim(),
+        contentTitle,
         data.platform,
         data.due_date,
-        "UPCOMING",
-        data.notes?.trim() || null
+        status,
+        notes
     );
 
     const deadline =
@@ -180,6 +198,8 @@ export const createDeadline = async (userId, data) => {
 
 // Get all deadlines for the logged-in user
 export const getDeadlines = async (userId) => {
+    parseId(userId, "user ID");
+
     const deadlines =
         await deadlineModel.getContentDeadlinesByUserId(userId);
 
@@ -191,6 +211,8 @@ export const getDeadlines = async (userId) => {
 
 // Get one deadline
 export const getDeadlineById = async (userId, deadlineId) => {
+    parseId(userId, "user ID");
+
     const deadline = await getOwnedDeadline(deadlineId, userId);
 
     return {
@@ -201,6 +223,8 @@ export const getDeadlineById = async (userId, deadlineId) => {
 
 // Update a deadline
 export const updateDeadline = async (userId, deadlineId, data) => {
+    parseId(userId, "user ID");
+
     const existing = await getOwnedDeadline(deadlineId, userId);
 
     validateDeadlineData(data, true);
@@ -208,7 +232,9 @@ export const updateDeadline = async (userId, deadlineId, data) => {
     const contentTitle =
         data.content_title === undefined
             ? existing.content_title
-            : data.content_title.trim();
+            : typeof data.content_title === "string"
+                ? data.content_title.trim() || null
+                : null;
 
     const platform =
         data.platform === undefined
@@ -227,13 +253,13 @@ export const updateDeadline = async (userId, deadlineId, data) => {
 
     const currentStatus = deriveStatus(existing);
 
+    // Completed deadlines remain completed
     const status =
         currentStatus === "COMPLETED"
             ? "COMPLETED"
             : deriveStatus({
                 due_date: dueDate,
-                completed_at: null,
-                status: "UPCOMING"
+                completed_at: null
             });
 
     await deadlineModel.updateContentDeadline(
@@ -264,6 +290,8 @@ export const updateDeadline = async (userId, deadlineId, data) => {
 
 // Mark a deadline as completed
 export const completeDeadline = async (userId, deadlineId) => {
+    parseId(userId, "user ID");
+
     const existing = await getOwnedDeadline(deadlineId, userId);
 
     if (existing.completed_at || existing.status === "COMPLETED") {
@@ -301,6 +329,8 @@ export const completeDeadline = async (userId, deadlineId) => {
 
 // Delete a deadline
 export const deleteDeadline = async (userId, deadlineId) => {
+    parseId(userId, "user ID");
+
     const deadline = await getOwnedDeadline(deadlineId, userId);
 
     const result = await deadlineModel.deleteContentDeadline(
