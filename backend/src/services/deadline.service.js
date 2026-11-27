@@ -1,14 +1,7 @@
 import * as deadlineModel from "../models/contentDeadline.model.js";
 import * as shipmentModel from "../models/shipment.model.js";
 import { apiError } from "../utils/apiError.js";
-
-const ALLOWED_PLATFORMS = [
-    "Instagram",
-    "YouTube",
-    "Pinterest",
-    "Blog",
-    "Other"
-];
+import { CONTENT_PLATFORM_VALUES } from "../constants/deadline.constants.js";
 
 const parseId = (value, fieldName = "ID") => {
     const id = String(value ?? "");
@@ -95,7 +88,7 @@ const validateDeadlineData = (data, isUpdate = false) => {
     }
 
     if (!isUpdate || data.platform !== undefined) {
-        if (!ALLOWED_PLATFORMS.includes(data.platform)) {
+        if (!CONTENT_PLATFORM_VALUES.includes(data.platform)) {
             errors.push("Invalid content platform");
         }
     }
